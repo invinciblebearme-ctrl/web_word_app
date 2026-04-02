@@ -32,8 +32,24 @@ function WordChallenge() {
   const speakWord = (word) => {
     window.speechSynthesis.cancel();
     if (!word) return;
+    
     const utterance = new SpeechSynthesisUtterance(word);
+    
+    // 사용 가능한 음성 목록 가져오기
+    const voices = window.speechSynthesis.getVoices();
+    
+    // 영어(미국/영국) 음성 중 네이티브에 가까운 음성 우선 필터링
+    let selectedVoice = voices.find(v => v.lang === 'en-US' && v.name.includes('Google')) ||
+                        voices.find(v => v.lang === 'en-US' && v.name.includes('Samantha')) ||
+                        voices.find(v => v.lang.startsWith('en-US')) ||
+                        voices.find(v => v.lang.startsWith('en'));
+
+    if (selectedVoice) {
+      utterance.voice = selectedVoice;
+    }
+    
     utterance.lang = 'en-US';
+    utterance.rate = 0.9; // 조금 더 또박또박하게 (기본 1.0)
     window.speechSynthesis.speak(utterance);
   };
 
