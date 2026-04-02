@@ -1,0 +1,128 @@
+body {
+    background-color: black;
+    font-family: Arial, sans-serif;
+    color: white;
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    padding: 1rem;
+}
+
+.navbar {
+    display: flex;
+    justify-content: center;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+    height: rem; /* Add this */
+    background-color: #333;
+    
+}
+
+.navbar a {
+    text-decoration: none;
+    color: white;
+    padding: 0.5rem 0.5rem;
+    margin-top: 10px;
+    flex: 1;
+    text-align: center;
+    align-items: center;
+}
+
+.navbar a:last-child {
+    border-right: none;
+}
+
+.navbar a:hover {
+    background-color: #555;
+    color: white;
+}
+
+.navtitle{
+    font-size: 12px;
+    color: white;
+}
+
+.title{
+    color: white;
+    font-size: 12px;
+}
+
+.container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+
+    padding-top: 3rem;
+}
+
+.row {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+}
+
+.item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 1rem;
+}
+
+img {
+    border-radius: 20%;
+    box-shadow: 5px;
+    width: 50px;
+    height: 50px;
+}
+
+img:hover {
+    cursor: pointer;
+    opacity: 0.8;
+    width: 52px;
+    height: 52px;
+}
+
+img:active {
+    transform: scale(0.95);
+}
+
+.subtitle {
+    margin-top: 20px;
+    margin-bottom: 10px;
+    color: #fff8f8;
+  }
+
+  .item {
+    transition: all 0.3s ease;
+}
+
+.search-container {
+    width: 100%;
+    margin-top: 50px;   /* 원하는 만큼 조절 */
+    text-align: center;
+}
+
+.dark-button {
+    /* padding: 8px;
+    border-radius: 5px;
+    background-color: #444;
+    color: #fff;
+    border: 1px solid #666;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s; */
+
+    padding: 8px 12px; border-radius: 5px; border: none; background-color: #333; color: white; cursor: pointer; margin-left:5px;
+}
+
+.dark-button:hover {
+    background-color: #555;
+    color: #fff;
+}
