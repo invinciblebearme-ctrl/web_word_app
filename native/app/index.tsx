@@ -14,6 +14,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import { Theme } from '../src/theme/theme';
 import allRounds from '../src/data/all_rounds.json';
+import { base64Decode } from '../src/utils/base64';
 
 const { width } = Dimensions.get('window');
 
@@ -132,7 +133,7 @@ export default function Home() {
                   <View style={styles.imageWrapper}>
                     <View style={styles.imageInner}>
                       <Image 
-                        source={{ uri: `https://word-assets.invinciblebearme.workers.dev/${atob(round.words[0].img)}` }} 
+                        source={{ uri: `https://word-assets.invinciblebearme.workers.dev/${base64Decode(round.words[0].img)}` }} 
                         style={styles.roundImg}
                         resizeMode="contain"
                       />
@@ -150,6 +151,7 @@ export default function Home() {
     </ScrollView>
   );
 }
+
 
 const styles = StyleSheet.create({
   scrollView: {

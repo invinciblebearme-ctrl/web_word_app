@@ -18,6 +18,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import { Theme } from '../../src/theme/theme';
 import allRounds from '../../src/data/all_rounds.json';
+import { base64Decode } from '../../src/utils/base64';
 
 const { width, height: screenHeight } = Dimensions.get('window');
 
@@ -94,7 +95,7 @@ export default function WordChallenge() {
 
   if (!roundData || !currentWord) return null;
 
-  const imgUrl = `https://word-assets.invinciblebearme.workers.dev/${atob(currentWord.img)}`;
+  const imgUrl = `https://word-assets.invinciblebearme.workers.dev/${base64Decode(currentWord.img)}`;
 
   return (
     <SafeAreaView style={styles.safeArea}>

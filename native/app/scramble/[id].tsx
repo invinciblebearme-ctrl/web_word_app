@@ -18,6 +18,7 @@ import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Theme } from '../../src/theme/theme';
 import allRounds from '../../src/data/all_rounds.json';
+import { base64Decode } from '../../src/utils/base64';
 
 const { width, height: screenHeight } = Dimensions.get('window');
 
@@ -112,7 +113,7 @@ export default function ScrambleGame() {
     setUserInput(prev => prev + letter);
   };
 
-  const imgUrl = currentWord ? `https://word-assets.invinciblebearme.workers.dev/${atob(currentWord.img)}` : null;
+  const imgUrl = currentWord ? `https://word-assets.invinciblebearme.workers.dev/${base64Decode(currentWord.img)}` : null;
 
   return (
     <SafeAreaView style={styles.safeArea}>
