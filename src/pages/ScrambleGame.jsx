@@ -92,15 +92,15 @@ function ScrambleGame() {
           <div className="word-ko">{currentWord.ko}</div>
 
           {/* Match WordChallenge image frame and style exactly */}
-          <div className="scramble-image-area-inline" style={{ margin: '0 auto' }}>
+          <div className="scramble-image-area-inline">
             {showImage && (
               isImageLoading ? (
-                <div className="spinner-container" style={{ height: '240px', justifyContent: 'center' }}>
+                <div className="spinner-container">
                   <div className="scramble-spinner"></div>
                 </div>
               ) : (
                 imgUrl && (
-                  <div className="challenge-image" style={{ marginTop: '10px', marginBottom: '10px' }}>
+                  <div className="challenge-image image-scramble-inline">
                     <img 
                       src={imgUrl} 
                       alt={currentWord.en}
@@ -127,7 +127,7 @@ function ScrambleGame() {
             onChange={(e) => setUserInput(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleCheck()}
           />
-          <div style={{ display: 'flex', gap: '10px', marginTop: '10px', flexWrap: 'wrap', justifyContent: 'center' }}>
+          <div className="scramble-button-group">
              <button className="dark-button reset-input" onClick={() => setUserInput('')}>지우기</button>
              <button className="dark-button check-btn" onClick={handleCheck}>정답확인</button>
              
