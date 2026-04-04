@@ -19,6 +19,12 @@ import { BlurView } from 'expo-blur';
 import { Theme } from '../../src/theme/theme';
 import allRounds from '../../src/data/all_rounds.json';
 import { base64Decode } from '../../src/utils/base64';
+import { 
+  ExpoSpeechRecognitionModule, 
+  useSpeechRecognitionEvent,
+  type ExpoSpeechRecognitionResultEvent,
+  type ExpoSpeechRecognitionErrorEvent
+} from 'expo-speech-recognition';
 
 const { width, height: screenHeight } = Dimensions.get('window');
 
@@ -32,7 +38,37 @@ export default function WordChallenge() {
   const router = useRouter();
   const [index, setIndex] = useState(0);
   const [showingEnglish, setShowingEnglish] = useState(true);
+  const [pronunciationScore, setPronunciationScore] = useState<{level: number, transcript: string} | null>(null);
+  const [isCapturing, setIsCapturing] = useState(false);
   
+  useSpeechRecognitionEvent('start', () => setIsCapturing(true));
+  useSpeechRecognitionEvent('end', () => setIsCapturing(false));
+  useSpeechRecognitionEvent('result', (event: ExpoSpeechRecognitionResultEvent) => {
+    const transcript = event.results[0]?.transcript.toLowerCase().trim() || '';
+    if (!transcript || !currentWord) return;
+
+    const target = currentWord.en.toLowerCase().trim();
+    let level = 1; // Try Again
+    
+    if (transcript === target) {
+      level = 3; // Excellent
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    } else if (transcript.includes(target) || target.includes(transcript)) {
+      level = 2; // Good
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    } else {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    }
+
+    setPronunciationScore({ transcript, level });
+  });
+
+  useSpeechRecognitionEvent('error', (event: ExpoSpeechRecognitionErrorEvent) => {
+    console.error('Speech Recognition Error:', event.error, event.message);
+    setIsCapturing(false);
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+  });
+
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -93,6 +129,24 @@ export default function WordChallenge() {
     }
   };
 
+  const handleSTT = async () => {
+    if (isCapturing) {
+      ExpoSpeechRecognitionModule.stop();
+    } else {
+      const result = await ExpoSpeechRecognitionModule.requestPermissionsAsync();
+      if (!result.granted) {
+        alert("마이크 사용 권한이 필요합니다.");
+        return;
+      }
+      
+      setPronunciationScore(null);
+      ExpoSpeechRecognitionModule.start({
+        lang: 'en-US',
+        interimResults: false,
+      });
+    }
+  };
+
   if (!roundData || !currentWord) return null;
 
   const imgUrl = `https://word-assets.invinciblebearme.workers.dev/${base64Decode(currentWord.img)}`;
@@ -135,11 +189,24 @@ export default function WordChallenge() {
                   resizeMode="contain"
                 />
               </View>
-              <Text style={styles.sentenceTextFree}>{currentWord?.sentence}</Text>
+              {(currentWord as any)?.sentence && (
+                <Text style={styles.sentenceTextFree}>{(currentWord as any).sentence}</Text>
+              )}
             </View>
           </View>
 
           <View style={styles.bottomSection}>
+            {pronunciationScore && (
+              <View style={[styles.sttFeedback, styles[`sttLevel${pronunciationScore.level}` as keyof typeof styles]] as any}>
+                <Text style={styles.feedbackTextMain}>
+                  {pronunciationScore.level === 3 && "Excellent! ⭐⭐⭐"}
+                  {pronunciationScore.level === 2 && "Good Job! ⭐⭐"}
+                  {pronunciationScore.level === 1 && "Try Again! ⭐"}
+                </Text>
+                <Text style={styles.transcriptText}>"{pronunciationScore.transcript}"</Text>
+              </View>
+            )}
+
             <View style={styles.navActionsRow}>
               <TouchableOpacity style={styles.navBtnGlass} onPress={prevWord}>
                 <Text style={styles.navBtnText}>이전</Text>
@@ -157,20 +224,20 @@ export default function WordChallenge() {
 
             <View style={styles.micContainer}>
               <LinearGradient
-                colors={(['#ef4444', '#dc2626']) as any}
-                style={styles.micButtonGradient}
+                colors={isCapturing ? (['#ef4444', '#b91c1c']) as any : (['#ef4444', '#dc2626']) as any}
+                style={[styles.micButtonGradient, isCapturing && styles.micButtonListening]}
               >
                 <TouchableOpacity 
                   style={styles.micButton}
                   activeOpacity={0.8}
-                  onPress={() => {
-                    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-                  }}
+                  onPress={handleSTT}
                 >
-                  <Text style={styles.micButtonText}>🎤 발음하기</Text>
+                  <Text style={styles.micButtonText}>
+                    {isCapturing ? "🎤 인식중..." : "🎤 발음하기"}
+                  </Text>
                 </TouchableOpacity>
               </LinearGradient>
-              <Text style={styles.chromeHint}>※ 발음확인은 크롬브라우저만 가능</Text>
+              <Text style={styles.chromeHint}>버튼을 누르고 영어로 말씀하세요</Text>
             </View>
           </View>
         </View>
@@ -281,6 +348,41 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
   },
+  sttFeedback: {
+    width: width * 0.85,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 20,
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  sttLevel3: {
+    backgroundColor: 'rgba(16, 185, 129, 0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(16, 185, 129, 0.3)',
+  },
+  sttLevel2: {
+    backgroundColor: 'rgba(245, 158, 11, 0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(245, 158, 11, 0.3)',
+  },
+  sttLevel1: {
+    backgroundColor: 'rgba(239, 68, 68, 0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(239, 68, 68, 0.3)',
+  },
+  feedbackTextMain: {
+    fontSize: 16,
+    fontFamily: Theme.fonts.bold,
+    color: '#fff',
+    marginBottom: 4,
+  },
+  transcriptText: {
+    fontSize: 13,
+    fontFamily: Theme.fonts.semiBold,
+    color: 'rgba(255, 255, 255, 0.6)',
+    fontStyle: 'italic',
+  },
   navActionsRow: {
     flexDirection: 'row',
     justifyContent: 'center',
@@ -317,6 +419,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 15,
     elevation: 8,
+  },
+  micButtonListening: {
+    shadowOpacity: 0.5,
+    shadowRadius: 20,
+    transform: [{ scale: 1.05 }],
   },
   micButton: {
     paddingVertical: 14,

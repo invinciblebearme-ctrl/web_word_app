@@ -22,6 +22,7 @@
     "expo-linking": "~8.0.11",
     "expo-router": "~6.0.23",
     "expo-speech": "~14.0.8",
+    "expo-speech-recognition": "^3.1.2",
     "expo-splash-screen": "~31.0.13",
     "expo-status-bar": "~3.0.9",
     "lucide-react-native": "^1.7.0",
@@ -35,6 +36,7 @@
   },
   "devDependencies": {
     "@types/react": "~19.1.10",
+    "eas-cli": "^12.6.2",
     "typescript": "~5.9.2"
   },
   "overrides": {
