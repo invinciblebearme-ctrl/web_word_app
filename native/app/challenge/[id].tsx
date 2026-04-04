@@ -95,9 +95,20 @@ export default function WordChallenge() {
     if (currentWord) {
       speak(currentWord.en);
       setShowingEnglish(true); // Reset to En
+      setPronunciationScore(null); // Reset pronunciation result
       triggerFadeEffect();
     }
   }, [index, id]);
+
+  // 2. Auto-hide pronunciation result after 3 seconds
+  useEffect(() => {
+    if (pronunciationScore) {
+      const timeout = setTimeout(() => {
+        setPronunciationScore(null);
+      }, 3000);
+      return () => clearTimeout(timeout);
+    }
+  }, [pronunciationScore]);
 
   // 2. Default Infinite Blinker: 1.5s Toggle (Fade applied to TEXT CARD only)
   useEffect(() => {
