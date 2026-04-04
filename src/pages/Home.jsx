@@ -22,21 +22,27 @@ function Home() {
 
   return (
     <div className="container">
-      <div className="search-container">
-        <input 
-          type="text" 
-          placeholder="회차 또는 단어 검색..." 
-          className="dark-button"
-          style={{ width: '250px', cursor: 'text' }}
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-        <button className="dark-button" onClick={() => setSearchTerm('')}>초기화</button>
+      <div className="home-body" style={{ textAlign: 'center' }}>
+        <h1>오늘의 영단어로 실력 Up</h1>
+
+        <div className="search-container">
+          <input 
+            type="text" 
+            placeholder="회차 또는 단어 검색..." 
+            className="dark-button"
+            style={{ width: '250px', cursor: 'text' }}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          {searchTerm && (
+            <button className="dark-button" onClick={() => setSearchTerm('')}>초기화</button>
+          )}
+        </div>
       </div>
 
-      {categories.map(category => (
+      {categories.map((category) => (
         <div key={category} style={{ width: '100%', textAlign: 'center' }}>
-          <h2 className="subtitle">{category}</h2>
+          
           <div className="grid-container">
             {filteredRounds
               .filter(r => r.category === category)
@@ -59,7 +65,14 @@ function Home() {
                   }}>
                     이미지<br/>준비중
                   </div>
-                  <p dangerouslySetInnerHTML={{ __html: round.name.replace(' ', '<br/>') }} />
+                  <p>
+                    {round.name.split(' ').map((text, i) => (
+                      <React.Fragment key={i}>
+                        {text}
+                        <br />
+                      </React.Fragment>
+                    ))}
+                  </p>
                 </div>
               ))}
           </div>
