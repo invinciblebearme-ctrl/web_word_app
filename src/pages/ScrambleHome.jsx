@@ -1,22 +1,44 @@
 import React, { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import allRounds from '../data/all_rounds.json'
 
 function ScrambleHome() {
   const [searchTerm, setSearchTerm] = useState('')
   const [filteredRounds, setFilteredRounds] = useState(allRounds)
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const currentGroup = searchParams.get('group') || '전체'
 
   useEffect(() => {
-    const filtered = allRounds.filter(round => 
-      round.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      round.words.some(word => 
-        word.en.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        word.ko.includes(searchTerm)
+    let filtered = allRounds;
+
+    // 1. Filter by group (1-20회, etc)
+    if (currentGroup !== '전체') {
+      const [start, end] = currentGroup.replace('회', '').split('-').map(Number);
+      filtered = filtered.filter(round => {
+        // Extract number from "오늘의 영단어 [1회]"
+        const match = round.name.match(/\[(\d+)회\]/);
+        if (match) {
+          const num = parseInt(match[1], 10);
+          return num >= start && num <= end;
+        }
+        return false;
+      });
+    }
+
+    // 2. Filter by search term
+    if (searchTerm) {
+      filtered = filtered.filter(round => 
+        round.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        round.words.some(word => 
+          word.en.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          word.ko.includes(searchTerm)
+        )
       )
-    )
+    }
+
     setFilteredRounds(filtered)
-  }, [searchTerm])
+  }, [searchTerm, currentGroup])
 
   const categories = [...new Set(allRounds.map(r => r.category))]
 
@@ -25,7 +47,7 @@ function ScrambleHome() {
       <div className="home-body" style={{ textAlign: 'center' }}>
         <h1 className="home-title">오늘의 영단어로 <br /> 실력 <span className="title-gradient-accent">Up (쓰기)</span></h1>
 
-        <div className="search-container" style={{ display: 'flex', width: '310px', margin: '50px auto', gap: '8px' }}>
+        <div className="search-container" style={{ display: 'flex', width: '310px', margin: '50px auto 20px', gap: '8px' }}>
           <input 
             type="text" 
             placeholder="스크램블 회차 검색..." 
@@ -44,6 +66,27 @@ function ScrambleHome() {
             }}
           />
           <button className="dark-button" onClick={() => setSearchTerm('')} style={{ margin: 0 }}>초기화</button>
+        </div>
+        
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '40px' }}>
+          <div className="sub-tabs-container">
+            {['1-20회', '21-40회', '41-60회', '61-80회', '전체'].map(group => (
+              <button
+                key={group}
+                className={`sub-tab-item ${currentGroup === group ? 'active' : ''}`}
+                onClick={() => {
+                  if (group === '전체') {
+                    searchParams.delete('group')
+                  } else {
+                    searchParams.set('group', group)
+                  }
+                  navigate(`/scramble?${searchParams.toString()}`)
+                }}
+              >
+                {group}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 

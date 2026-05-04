@@ -35,6 +35,49 @@ header {
     pointer-events: auto;
 }
 
+.sub-tabs-container {
+    display: flex;
+    background: rgba(28, 35, 49, 0.4);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+    padding: 4px;
+    pointer-events: auto;
+    width: 100%;
+    max-width: 310px;
+    justify-content: space-between;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.sub-tab-item {
+    background: transparent;
+    border: 1px solid transparent;
+    color: #8b98a5;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 6px 8px;
+    border-radius: 16px;
+    cursor: pointer;
+    transition: all 0.3s;
+    outline: none;
+    flex: 1; /* Distribute space evenly */
+    white-space: nowrap;
+}
+
+.sub-tab-item:hover {
+    color: white;
+}
+
+.sub-tab-item.active {
+    color: #38bdf8;
+    background: rgba(56, 189, 248, 0.1);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    box-shadow: 0 0 8px rgba(56, 189, 248, 0.2);
+}
+
+
+
 .segment-item {
     padding: 10px 25px;
     text-decoration: none;
