@@ -31,7 +31,7 @@ header {
     border-radius: 50px;
     padding: 5px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 
-                0 0 15px rgba(179, 136, 255, 0.2);
+                0 0 15px rgba(56, 189, 248, 0.2);
     pointer-events: auto;
 }
 
@@ -53,9 +53,9 @@ header {
 }
 
 .segment-item.active {
-    background: #d6aaff;
+    background: #38bdf8;
     color: #1a1a2e;
-    box-shadow: 0 4px 12px rgba(214, 170, 255, 0.4);
+    box-shadow: 0 4px 12px rgba(56, 189, 248, 0.4);
 }
 
 .nav-icon {
@@ -91,11 +91,12 @@ header {
 }
 
 .item p {
-    margin: 6px 0 0 0;
+    margin: 8px 0 0 0;
     text-align: center;
     font-size: 13px;
-    color: white;
+    color: #9ca3af;
     line-height: 1.3;
+    transition: all 0.3s ease;
 }
 
 img {
@@ -103,12 +104,18 @@ img {
     width: 52px;
     height: 52px;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
 }
 
-img:hover {
-    opacity: 0.8;
-    transform: scale(1.05);
+.item:hover img {
+    box-shadow: 0 0 15px rgba(56, 189, 248, 0.6);
+    transform: scale(1.05) translateY(-3px);
+    opacity: 1;
+}
+
+.item:hover p {
+    color: white;
+    font-weight: bold;
 }
 
 img:active {
@@ -130,24 +137,49 @@ img:active {
 
 .search-container {
     width: 100%;
-    margin-top: 50px;
-    margin-bottom: 50px; /* Reduced back to half for better balance */
-    text-align: center;
+    margin-top: 30px;
+    margin-bottom: 40px; /* Reduced back to half for better balance */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+.home-search-input {
+    width: 100%;
+    max-width: 320px;
+    padding: 12px 16px;
+    background: #1e222d;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    color: white;
+    font-size: 0.95rem;
+    outline: none;
+    transition: all 0.3s;
+}
+
+.home-search-input:focus {
+    border-color: #38bdf8;
+    box-shadow: 0 0 8px rgba(56, 189, 248, 0.3);
+}
+
+.home-search-input::placeholder {
+    color: #64748b;
 }
 
 .dark-button {
     padding: 8px 12px;
-    border-radius: 5px;
-    border: none;
-    background-color: #333;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    background-color: #1e222d;
     color: white;
     cursor: pointer;
     margin-left: 5px;
-    transition: background-color 0.2s;
+    transition: all 0.2s;
 }
 
 .dark-button:hover {
-    background-color: #555;
+    background-color: #2a2f3d;
 }
 
 .challenge-body {
@@ -170,7 +202,7 @@ img:active {
 
 .challenge-container h1 {
     font-size: 1.5rem;
-    color: #d6aaff;
+    color: #38bdf8;
     margin: 0 0 10px 0; /* Slightly more bottom margin for 3 lines */
     text-align: center;
     line-height: 1.2; /* Better spacing for multi-line title */
@@ -178,28 +210,34 @@ img:active {
 
 .challenge-index {
     font-size: 1.2rem;
-    color: #ccbaff;
+    color: #64748b;
     margin-bottom: 10px; /* Exact match */
 }
 
 .challenge-card {
     font-size: 2.2rem;
     padding: 30px 20px;
-    background: #2e2e3e;
-    border: 3px solid #a675f7;
+    background: #1e222d;
+    border: 1px solid rgba(255, 255, 255, 0.05);
     border-radius: 25px;
     text-align: center;
-    box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
     width: 90%; /* Fluid width for mobile */
     max-width: 300px; /* Current desktop width preserved */
-    color: #e6d0ff;
+    color: white;
     cursor: pointer;
     display: flex;
     flex-direction: column;
+    justify-content: center;
+    align-items: center;
     gap: 15px;
+    min-height: 130px;
+    box-sizing: border-box;
 }
 
 .word-en {
+    font-family: 'Arial Rounded MT Bold', 'Nunito', 'Quicksand', 'Comic Sans MS', sans-serif;
+    font-size: 1.8rem;
     font-weight: bold;
     animation: blinker 1.2s linear infinite; /* Increased duration for smoother feel */
 }
@@ -207,6 +245,7 @@ img:active {
 .word-ko {
     font-size: 1.5rem;
     color: #ffd700; /* Distinct gold color for the meaning */
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
 }
 
 @keyframes blinker {
@@ -219,8 +258,7 @@ img:active {
     height: 240px;
     max-width: 90%;
     aspect-ratio: 1 / 1;
-    background: #444;
-    border: 3px solid #eacbff;
+    background: transparent;
     border-radius: 20px;
     display: flex;
     align-items: center;
@@ -256,25 +294,23 @@ img:active {
     font-size: 0.8rem;
     font-weight: 700;
     cursor: pointer;
-    background: #6c5ce7;
+    background: #1e222d;
     color: white;
-    border: none;
-    border-radius: 50px;
-    box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
     display: flex;
     align-items: center;
     justify-content: center;
     white-space: nowrap; /* Prevent wrapping text inside button */
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.05);
     flex: 1; /* Equal width for all 4 buttons */
 }
 
 .nav-btn-premium:hover {
-    transform: translateY(-3px) scale(1.05);
-    background: #5f4de1;
-    box-shadow: 0 8px 25px rgba(108, 92, 231, 0.5);
-    color: #fff;
+    transform: translateY(-2px);
+    background: #2a2f3d;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
 
 .nav-btn-premium:active {
@@ -285,8 +321,8 @@ img:active {
     padding: 10px 4px; /* Minimize side padding for horizontal space */
     font-size: 0.85rem; /* Reduced font size to fit long text like "발음 듣기" */
     cursor: pointer;
-    background: #805dd4;
-    border: 2px solid #9e7fdc;
+    background: #1e222d;
+    border: 1px solid rgba(255, 255, 255, 0.05);
     border-radius: 10px;
     color: #fff;
     transition: 0.2s;
@@ -296,7 +332,7 @@ img:active {
 }
 
 .challenge-controls button:hover {
-    background: #9d78d0;
+    background: #2a2f3d;
 }
 
 /* STT (Speech Recognition) Styles */
@@ -389,22 +425,23 @@ img:active {
 }
 
 .letter-card {
-    background: #333945;
+    background: #111827;
     color: #fff;
     padding: 10px 15px;
     border-radius: 8px;
     font-size: 1.2rem;
     cursor: pointer;
-    border: 1px solid #444c5a;
+    border: 1px solid rgba(255, 255, 255, 0.05);
     transition: all 0.2s;
     user-select: none;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.5);
 }
 
 .letter-card:hover {
-    background: #444c5a;
+    background: #1e293b;
     transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+    border: 1px solid #38bdf8;
+    box-shadow: 0 0 12px rgba(56, 189, 248, 0.5);
 }
 
 .letter-card:active {
@@ -412,8 +449,8 @@ img:active {
 }
 
 .scramble-input {
-    background: #1e222d;
-    border: 2px solid #333945;
+    background: #111827;
+    border: 1px solid rgba(255, 255, 255, 0.05);
     color: white;
     padding: 15px;
     border-radius: 12px;
@@ -422,28 +459,31 @@ img:active {
     text-align: center;
     outline: none;
     margin-top: 20px;
-    transition: border-color 0.3s;
+    transition: all 0.3s;
 }
 
 .scramble-input:focus {
-    border-color: #d6aaff;
+    border-color: #38bdf8;
+    box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
 }
 
 .scramble-game .word-ko {
     font-size: 1.8rem;
     margin-bottom: 20px;
-    color: #d6aaff;
+    color: #38bdf8;
     font-weight: bold;
+    text-shadow: 0 0 15px rgba(56, 189, 248, 0.6);
 }
 
 .scramble-game .check-btn {
-    background: #d6aaff !important;
+    background: #38bdf8 !important;
     color: #1a1a1a !important;
     font-weight: bold;
 }
 
 .scramble-game .reset-input {
-    background: #444c5a !important;
+    background: #111827 !important;
+    border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .scramble-game .challenge-card {
@@ -475,17 +515,18 @@ img:active {
 .view-img-btn-inline {
     padding: 8px 18px;
     font-size: 0.95rem;
-    background: #444c5a !important;
-    border: 1px solid #57606f;
+    background: #111827 !important;
+    border: 1px solid rgba(255, 255, 255, 0.05);
     border-radius: 20px;
     transition: all 0.3s;
     width: 100%; /* Take full width below other buttons if needed or auto */
     max-width: 200px;
     margin-top: 5px;
+    color: white;
 }
 
 .view-img-btn-inline:hover {
-    background: #57606f !important;
+    background: #1f2937 !important;
     transform: scale(1.05);
 }
 
@@ -504,8 +545,8 @@ img:active {
 .scramble-spinner {
     width: 40px;
     height: 40px;
-    border: 4px solid rgba(214, 170, 255, 0.1);
-    border-top: 4px solid #d6aaff;
+    border: 4px solid rgba(56, 189, 248, 0.1);
+    border-top: 4px solid #38bdf8;
     border-radius: 50%;
     animation: spin 1s linear infinite;
     margin-bottom: 10px;

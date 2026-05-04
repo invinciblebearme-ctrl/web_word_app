@@ -23,14 +23,13 @@ function Home() {
   return (
     <div className="container">
       <div className="home-body" style={{ textAlign: 'center' }}>
-        <h1>오늘의 영단어로 실력 Up</h1>
+        <h1>오늘의 영단어로 실력 <span style={{ color: '#38bdf8' }}>Up</span></h1>
 
         <div className="search-container">
           <input 
             type="text" 
             placeholder="회차 또는 단어 검색..." 
-            className="dark-button"
-            style={{ width: '250px', cursor: 'text' }}
+            className="home-search-input"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
