@@ -93,11 +93,16 @@ function WordChallenge() {
 
   // STT 발음 측정 시작
   const startSTT = () => {
-    // Chrome 여부 확인
-    const isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
+    // 브라우저 판별
+    const ua = navigator.userAgent;
+    const isWhale = ua.indexOf("Whale") > -1;
+    const isEdge = ua.indexOf("Edg") > -1;
+    const isChrome = !isWhale && !isEdge && /Chrome/.test(ua) && /Google Inc/.test(navigator.vendor);
     
-    if (!isChrome) {
-      alert("⚠️ 이 기능은 Google Chrome 브라우저에서만 정상적으로 작동합니다.\n현재 브라우저에서는 인식이 안 될 수 있으니, Chrome으로 접속해 주세요!");
+    const isSupported = isChrome || isEdge || isWhale;
+    
+    if (!isSupported) {
+      alert("⚠️ 현재 브라우저에서는 음성 인식이 지원되지 않을 수 있습니다.\nChrome, Edge, 또는 Whale 브라우저로 접속하시면 가장 정확하게 작동합니다.");
     }
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -204,7 +209,7 @@ function WordChallenge() {
           >
             {isListening ? "🎤 측정중..." : "🎤 발음하기"}
           </button>
-          <div className="mic-hint">※ 발음확인은 크롬브라우저만 가능</div>
+          <div className="mic-hint">※ 크롬, 엣지, 웨일 브라우저에서 발음 확인이 가능합니다.</div>
         </div>
       </div>
     </div>
