@@ -80,7 +80,7 @@ function ScrambleGame() {
     setUserInput(prev => prev + letter)
   }
 
-  const imgUrl = currentWord ? `https://word-assets.invinciblebearme.workers.dev/${window.atob(currentWord.img)}` : null
+  const imgUrl = currentWord ? `https://word-assets.pages.dev/${window.atob(currentWord.img)}` : null
 
   return (
     <div className="challenge-body scramble-game">

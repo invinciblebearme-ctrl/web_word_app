@@ -89,7 +89,7 @@ function WordChallenge() {
   if (!roundData) return <div className="challenge-body">데이터를 불러오는 중...</div>;
 
   const currentWord = roundData.words[index]
-  const imgUrl = currentWord.img ? `https://word-assets.invinciblebearme.workers.dev/${window.atob(currentWord.img)}` : null
+  const imgUrl = currentWord.img ? `https://word-assets.pages.dev/${window.atob(currentWord.img)}` : null
 
   // STT 발음 측정 시작
   const startSTT = () => {
