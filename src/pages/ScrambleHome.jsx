@@ -23,7 +23,7 @@ function ScrambleHome() {
   return (
     <div className="container">
       <div className="home-body" style={{ textAlign: 'center' }}>
-        <h1>오늘의 영단어로 <br /> 실력 <span style={{ color: '#38bdf8' }}>Up (쓰기)</span></h1>
+        <h1 className="home-title">오늘의 영단어로 <br /> 실력 <span className="title-gradient-accent">Up (쓰기)</span></h1>
 
         <div className="search-container" style={{ display: 'flex', width: '310px', margin: '50px auto', gap: '8px' }}>
           <input 

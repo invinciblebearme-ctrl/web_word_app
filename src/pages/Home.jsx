@@ -23,8 +23,8 @@ function Home() {
   return (
     <div className="container">
       <div className="home-body" style={{ textAlign: 'center' }}>
-        <h1 className="home-title" style={{ background: 'none', WebkitTextFillColor: 'var(--text-primary)' }}>
-          오늘의 영단어로 <span style={{ color: 'var(--accent)', WebkitTextFillColor: 'var(--accent)' }}>실력 Up</span>
+        <h1 className="home-title">
+          오늘의 영단어로 <span className="title-gradient-accent">실력 Up</span>
         </h1>
 
         <div className="search-container" style={{ display: 'flex', width: '310px', margin: '50px auto', gap: '8px' }}>
