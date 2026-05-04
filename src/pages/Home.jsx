@@ -23,19 +23,29 @@ function Home() {
   return (
     <div className="container">
       <div className="home-body" style={{ textAlign: 'center' }}>
-        <h1>오늘의 영단어로 실력 <span style={{ color: '#38bdf8' }}>Up</span></h1>
+        <h1 className="home-title" style={{ background: 'none', WebkitTextFillColor: 'var(--text-primary)' }}>
+          오늘의 영단어로 <span style={{ color: 'var(--accent)', WebkitTextFillColor: 'var(--accent)' }}>실력 Up</span>
+        </h1>
 
-        <div className="search-container">
+        <div className="search-container" style={{ display: 'flex', width: '310px', margin: '50px auto', gap: '8px' }}>
           <input 
             type="text" 
+            className="search-input" 
             placeholder="회차 또는 단어 검색..." 
-            className="home-search-input"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
+            style={{
+              padding: '10px 15px',
+              borderRadius: '12px',
+              border: '1px solid var(--border)',
+              background: 'rgba(2, 6, 23, 0.6)',
+              color: 'var(--text-primary)',
+              fontFamily: 'inherit',
+              outline: 'none',
+              flex: 1
+            }}
           />
-          {searchTerm && (
-            <button className="dark-button" onClick={() => setSearchTerm('')}>초기화</button>
-          )}
+          <button className="dark-button" onClick={() => setSearchTerm('')} style={{ margin: 0 }}>초기화</button>
         </div>
       </div>
 
@@ -64,14 +74,7 @@ function Home() {
                   }}>
                     이미지<br/>준비중
                   </div>
-                  <p>
-                    {round.name.split(' ').map((text, i) => (
-                      <React.Fragment key={i}>
-                        {text}
-                        <br />
-                      </React.Fragment>
-                    ))}
-                  </p>
+                  <p>오늘의<br />영단어<br />{round.name.replace('오늘의 영단어 ', '')}</p>
                 </div>
               ))}
           </div>
