@@ -1,6 +1,7 @@
 /* Global Styles (from original styles.css) */
 body {
-    background-color: #1c2331; /* Image's deep dark blue-gray */
+    background-color: #1c2331;
+    /* Image's deep dark blue-gray */
     font-family: Arial, sans-serif;
     color: white;
     margin: 0;
@@ -19,7 +20,8 @@ header {
     display: flex;
     justify-content: center;
     z-index: 2000;
-    pointer-events: none; /* Let clicks pass through outside the pill */
+    pointer-events: none;
+    /* Let clicks pass through outside the pill */
 }
 
 .segmented-control {
@@ -30,8 +32,8 @@ header {
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 50px;
     padding: 5px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 
-                0 0 15px rgba(56, 189, 248, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5),
+        0 0 15px rgba(56, 189, 248, 0.2);
     pointer-events: auto;
 }
 
@@ -61,7 +63,8 @@ header {
     cursor: pointer;
     transition: all 0.3s;
     outline: none;
-    flex: 1; /* Distribute space evenly */
+    flex: 1;
+    /* Distribute space evenly */
     white-space: nowrap;
 }
 
@@ -79,16 +82,21 @@ header {
 
 
 .segment-item {
-    padding: 10px 25px;
+    padding: 8px 18px;
+    /* 가로 크기 0.75배 축소 */
     text-decoration: none;
     color: #a0a0b8;
-    font-size: 0.95rem;
+    font-size: 0.75rem;
+    /* 폰트 크기 축소 */
     font-weight: 600;
     border-radius: 40px;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
+    /* 아이콘과 텍스트 간격 축소 */
+    white-space: nowrap;
+    /* 줄바꿈 금지 */
 }
 
 .segment-item:hover {
@@ -102,14 +110,16 @@ header {
 }
 
 .nav-icon {
-    font-size: 1.1rem;
+    font-size: 0.85rem;
+    /* 아이콘 크기 축소 */
 }
 
 .container {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding-top: 100px; /* Reverted back to previous compact spacing */
+    padding-top: 100px;
+    /* Reverted back to previous compact spacing */
     padding-bottom: 3rem;
 }
 
@@ -118,7 +128,8 @@ header {
     grid-template-columns: repeat(4, 1fr);
     gap: 0;
     width: 95%;
-    max-width: 350px; /* Preserve the desktop feel you like */
+    max-width: 350px;
+    /* Preserve the desktop feel you like */
     justify-items: center;
     margin: 0 auto;
 }
@@ -127,7 +138,8 @@ header {
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin: 10px 2px; /* Tight margins to prevent overflow on small mobiles */
+    margin: 10px 2px;
+    /* Tight margins to prevent overflow on small mobiles */
     transition: all 0.3s ease;
     width: 100%;
     min-height: 110px;
@@ -175,7 +187,8 @@ img:active {
     font-size: 2.2rem;
     color: white;
     margin-bottom: 0px;
-    margin-top: 35px; /* Fine-tuned for 50px gap from navbar bottom */
+    margin-top: 25px;
+    /* Fine-tuned for 50px gap from navbar bottom */
 }
 
 .title-gradient-accent {
@@ -188,7 +201,8 @@ img:active {
 .search-container {
     width: 100%;
     margin-top: 30px;
-    margin-bottom: 40px; /* Reduced back to half for better balance */
+    margin-bottom: 40px;
+    /* Reduced back to half for better balance */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -241,11 +255,13 @@ img:active {
 
 .challenge-body {
     font-family: 'Comic Sans MS', 'Arial';
-    background-color: #1c2331; /* Match main background */
+    background-color: #1c2331;
+    /* Match main background */
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center; /* Exact match with original WordChallenge01.html */
+    justify-content: center;
+    /* Exact match with original WordChallenge01.html */
     height: 100vh;
     margin: 0;
 }
@@ -260,15 +276,18 @@ img:active {
 .challenge-container h1 {
     font-size: 1.5rem;
     color: #38bdf8;
-    margin: 0 0 10px 0; /* Slightly more bottom margin for 3 lines */
+    margin: 0 0 10px 0;
+    /* Slightly more bottom margin for 3 lines */
     text-align: center;
-    line-height: 1.2; /* Better spacing for multi-line title */
+    line-height: 1.2;
+    /* Better spacing for multi-line title */
 }
 
 .challenge-index {
     font-size: 1.2rem;
     color: #64748b;
-    margin-bottom: 10px; /* Exact match */
+    margin-bottom: 10px;
+    /* Exact match */
 }
 
 .challenge-card {
@@ -281,8 +300,10 @@ img:active {
     border-radius: 25px;
     text-align: center;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-    width: 90%; /* Fluid width for mobile */
-    max-width: 300px; /* Current desktop width preserved */
+    width: 90%;
+    /* Fluid width for mobile */
+    max-width: 300px;
+    /* Current desktop width preserved */
     color: white;
     cursor: pointer;
     display: flex;
@@ -298,22 +319,29 @@ img:active {
     font-family: 'Arial Rounded MT Bold', 'Nunito', 'Quicksand', 'Comic Sans MS', sans-serif;
     font-size: 1.8rem;
     font-weight: bold;
-    animation: blinker 1.2s linear infinite; /* Increased duration for smoother feel */
+    animation: blinker 1.2s linear infinite;
+    /* Increased duration for smoother feel */
 }
 
 .word-ko {
     font-size: 1.5rem;
-    color: #ffd700; /* Distinct gold color for the meaning */
+    color: #ffd700;
+    /* Distinct gold color for the meaning */
     text-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
 }
 
 @keyframes blinker {
-    50% { opacity: 0; } /* Fully disappear for clear blinking effect */
+    50% {
+        opacity: 0;
+    }
+
+    /* Fully disappear for clear blinking effect */
 }
 
 .challenge-image {
     margin: 15px auto 0 auto;
-    width: 240px; /* Enlarged 1.5x */
+    width: 240px;
+    /* Enlarged 1.5x */
     height: 240px;
     max-width: 90%;
     aspect-ratio: 1 / 1;
@@ -329,7 +357,8 @@ img:active {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    border-radius: 17px; /* Inner radius for clean fit */
+    border-radius: 17px;
+    /* Inner radius for clean fit */
 }
 
 .no-image {
@@ -341,15 +370,18 @@ img:active {
 .challenge-controls {
     margin: 25px auto 0 auto;
     display: flex;
-    flex-wrap: nowrap; /* Keep them in a single row */
+    flex-wrap: nowrap;
+    /* Keep them in a single row */
     gap: 6px;
     justify-content: center;
     width: 100%;
-    max-width: 310px; /* Aligned with word card width */
+    max-width: 310px;
+    /* Aligned with word card width */
 }
 
 .nav-btn-premium {
-    padding: 8px 10px; /* More compact for fitting 4 buttons */
+    padding: 8px 10px;
+    /* More compact for fitting 4 buttons */
     font-size: 0.8rem;
     font-weight: 700;
     cursor: pointer;
@@ -363,9 +395,11 @@ img:active {
     display: flex;
     align-items: center;
     justify-content: center;
-    white-space: nowrap; /* Prevent wrapping text inside button */
+    white-space: nowrap;
+    /* Prevent wrapping text inside button */
     border: 1px solid rgba(255, 255, 255, 0.1);
-    flex: 1; /* Equal width for all 4 buttons */
+    flex: 1;
+    /* Equal width for all 4 buttons */
 }
 
 .nav-btn-premium:hover {
@@ -380,8 +414,10 @@ img:active {
 }
 
 .challenge-controls button {
-    padding: 10px 4px; /* Minimize side padding for horizontal space */
-    font-size: 0.85rem; /* Reduced font size to fit long text like "발음 듣기" */
+    padding: 10px 4px;
+    /* Minimize side padding for horizontal space */
+    font-size: 0.85rem;
+    /* Reduced font size to fit long text like "발음 듣기" */
     cursor: pointer;
     background: rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(8px);
@@ -390,9 +426,12 @@ img:active {
     border-radius: 10px;
     color: #fff;
     transition: 0.3s;
-    flex: 1; /* Make buttons grow equally within the container */
-    min-width: 0; /* Allow buttons to shrink as needed */
-    white-space: nowrap; /* Prevent text inside buttons from wrapping */
+    flex: 1;
+    /* Make buttons grow equally within the container */
+    min-width: 0;
+    /* Allow buttons to shrink as needed */
+    white-space: nowrap;
+    /* Prevent text inside buttons from wrapping */
 }
 
 .challenge-controls button:hover {
@@ -450,9 +489,17 @@ img:active {
 }
 
 @keyframes pulse-red {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.08); }
-    100% { transform: scale(1); }
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.08);
+    }
+
+    100% {
+        transform: scale(1);
+    }
 }
 
 .stt-feedback {
@@ -465,13 +512,34 @@ img:active {
 }
 
 @keyframes slideUp {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-.level-3 { background: #2ed573; color: white; border: 2px solid #1fa355; }
-.level-2 { background: #ffa502; color: white; border: 2px solid #e67e22; }
-.level-1 { background: #57606f; color: white; border: 2px solid #2f3542; }
+.level-3 {
+    background: #2ed573;
+    color: white;
+    border: 2px solid #1fa355;
+}
+
+.level-2 {
+    background: #ffa502;
+    color: white;
+    border: 2px solid #e67e22;
+}
+
+.level-1 {
+    background: #57606f;
+    color: white;
+    border: 2px solid #2f3542;
+}
 
 .transcript-hint {
     font-size: 0.9rem;
@@ -577,11 +645,12 @@ img:active {
 }
 
 .word-image-inline {
-    max-width: 240px; /* Increased to match flashcard size */
+    max-width: 240px;
+    /* Increased to match flashcard size */
     max-height: 240px;
     border-radius: 12px;
     margin: 10px 0;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
     object-fit: cover;
 }
 
@@ -594,7 +663,8 @@ img:active {
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 20px;
     transition: all 0.3s;
-    width: 100%; /* Take full width below other buttons if needed or auto */
+    width: 100%;
+    /* Take full width below other buttons if needed or auto */
     max-width: 200px;
     margin-top: 5px;
     color: white;
@@ -630,8 +700,13 @@ img:active {
 }
 
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 .fade-in {
@@ -639,13 +714,21 @@ img:active {
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: scale(0.95); }
-    to { opacity: 1; transform: scale(1); }
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
 /* 나만의 단어장 추가 스타일 */
 .challenge-card {
-    position: relative; /* For absolute positioning of favorite button */
+    position: relative;
+    /* For absolute positioning of favorite button */
 }
 
 .favorite-btn {
@@ -656,7 +739,8 @@ img:active {
     border: none;
     font-size: 1.5rem;
     cursor: pointer;
-    color: rgba(255, 255, 255, 0.2); /* Subtle gray in dark mode */
+    color: rgba(255, 255, 255, 0.2);
+    /* Subtle gray in dark mode */
     transition: all 0.3s;
     z-index: 10;
     padding: 5px;
@@ -669,12 +753,56 @@ img:active {
 }
 
 .favorite-btn.active {
-    color: #fbbf24; /* Star gold */
+    color: #fbbf24;
+    /* Star gold */
     text-shadow: 0 0 10px rgba(251, 191, 36, 0.4);
 }
 
 .voca-list-container {
-    max-width: 600px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* 내부 카드들 중앙 정렬 */
+    gap: 8px;
+    width: 384px;
+    /* 320px * 1.2배 증대 */
     margin: 0 auto;
-    padding-bottom: 50px;
+    /* 컨테이너 자체 중앙 정렬 */
+    padding: 10px;
+    padding-bottom: 100px;
+}
+
+.voca-card {
+    height: 50px !important;
+    min-height: 40px !important;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    padding: 0 15px !important;
+    border-radius: 10px !important;
+    overflow: hidden;
+}
+
+.voca-delete-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: transparent;
+    border: none;
+    color: #f87171;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.voca-delete-btn:hover {
+    transform: scale(1.2);
+}
+
+.voca-speak-btn {
+    margin-top: 15px;
+    padding: 5px 12px;
+    font-size: 0.8rem;
 }
