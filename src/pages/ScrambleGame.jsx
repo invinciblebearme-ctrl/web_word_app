@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import allRounds from '../data/all_rounds.json'
+import { addToMyVoca, removeFromMyVoca, isFavorite } from '../utils/storage'
 
 function ScrambleGame() {
   const { id } = useParams()
@@ -27,6 +28,8 @@ function ScrambleGame() {
     return arr
   }
 
+  const [fav, setFav] = useState(false)
+  
   useEffect(() => {
     if (currentWord) {
       setScrambled(shuffleWord(currentWord.en.toLowerCase()))
@@ -34,8 +37,19 @@ function ScrambleGame() {
       setFeedback(null)
       setShowImage(false)
       setIsImageLoading(false)
+      setFav(isFavorite(currentWord.en))
     }
   }, [index, currentWord])
+
+  const toggleFavorite = () => {
+    if (fav) {
+      removeFromMyVoca(currentWord.en);
+      setFav(false);
+    } else {
+      addToMyVoca(currentWord);
+      setFav(true);
+    }
+  };
 
   if (!roundData) return <div>게임을 찾을 수 없습니다.</div>
 
@@ -89,6 +103,13 @@ function ScrambleGame() {
         <div className="challenge-index">단어 {index + 1} / {roundData.words.length}</div>
         
         <div className="challenge-card">
+          <button 
+            className={`favorite-btn ${fav ? 'active' : ''}`} 
+            onClick={toggleFavorite}
+            title="나만의 단어장에 저장"
+          >
+            {fav ? '⭐' : '☆'}
+          </button>
           <div className="word-ko">{currentWord.ko}</div>
 
           {/* Match WordChallenge image frame and style exactly */}

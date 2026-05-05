@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import allRounds from '../data/all_rounds.json'
+import { addToMyVoca, removeFromMyVoca, isFavorite } from '../utils/storage'
 
 function WordChallenge() {
   const { id } = useParams()
@@ -79,12 +80,26 @@ function WordChallenge() {
   const [imgError, setImgError] = useState(false)
   const [isListening, setIsListening] = useState(false)
   const [pronunciationScore, setPronunciationScore] = useState(null)
+  const [fav, setFav] = useState(false)
   
   // 단어가 바뀔 때마다 이미지 에러 및 발음 점수 초기화
   useEffect(() => {
     setImgError(false)
     setPronunciationScore(null)
-  }, [index, id])
+    if (currentWord) {
+      setFav(isFavorite(currentWord.en))
+    }
+  }, [index, id, currentWord])
+
+  const toggleFavorite = () => {
+    if (fav) {
+      removeFromMyVoca(currentWord.en);
+      setFav(false);
+    } else {
+      addToMyVoca(currentWord);
+      setFav(true);
+    }
+  };
 
   if (!roundData) return <div className="challenge-body">데이터를 불러오는 중...</div>;
 
@@ -165,6 +180,13 @@ function WordChallenge() {
         <div className="challenge-index">단어 {index + 1} / {roundData.words.length}</div>
         
         <div className="challenge-card">
+          <button 
+            className={`favorite-btn ${fav ? 'active' : ''}`} 
+            onClick={toggleFavorite}
+            title="나만의 단어장에 저장"
+          >
+            {fav ? '⭐' : '☆'}
+          </button>
           {showingEnglish ? (
             <div className="word-en">{currentWord.en}</div>
           ) : (

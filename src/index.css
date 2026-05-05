@@ -642,3 +642,39 @@ img:active {
     from { opacity: 0; transform: scale(0.95); }
     to { opacity: 1; transform: scale(1); }
 }
+
+/* 나만의 단어장 추가 스타일 */
+.challenge-card {
+    position: relative; /* For absolute positioning of favorite button */
+}
+
+.favorite-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.2); /* Subtle gray in dark mode */
+    transition: all 0.3s;
+    z-index: 10;
+    padding: 5px;
+    line-height: 1;
+}
+
+.favorite-btn:hover {
+    transform: scale(1.2);
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.favorite-btn.active {
+    color: #fbbf24; /* Star gold */
+    text-shadow: 0 0 10px rgba(251, 191, 36, 0.4);
+}
+
+.voca-list-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding-bottom: 50px;
+}
