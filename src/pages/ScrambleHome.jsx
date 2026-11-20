@@ -101,6 +101,8 @@ function ScrambleHome() {
                 <div key={round.id} className="item" onClick={() => navigate(`/scramble-game/${round.id}`)}>
                   <img 
                     src={wordImageUrl(round.words[0].img)} 
+                    loading="lazy"
+                    decoding="async"
                     alt={round.name}
                     style={{ objectFit: 'contain' }}
                     onError={(e) => {

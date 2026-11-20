@@ -9,9 +9,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js" integrity="sha384-EnyY0/GSHQGSxSgMwaIPzSESbqoOLSexfnSMN2AP+39Ckmn92stwABZynq1JyzdT" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.3.1675466862/camera_utils.js" integrity="sha384-q1KhAZhJcJXr3zfC3Tz07pBqQSabwFIZhXlmlUAB8s0zk4ETWERkIKGBCFQ5Jc3e" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/hands.js" integrity="sha384-oHwoZ9HyKv5ark5VOH+XWdbNfmhYtptAOBuV8plz6mAfXvTA6d8fULuYllWouEK2" crossorigin="anonymous"></script>
 
   <style>
     :root {
@@ -533,7 +533,7 @@
         document.getElementById('startBtn').style.opacity = '0.5';
         document.getElementById('startBtn').disabled = true;
 
-        handsModel = new Hands({ locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}` });
+        handsModel = new Hands({ locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/${file}` });
         handsModel.setOptions({ maxNumHands: 2, modelComplexity: 0, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5 });
         handsModel.onResults(onAiResults);
 
@@ -638,19 +638,25 @@
       reader.readAsArrayBuffer(file);
     });
 
+    // 업로드한 엑셀의 시트 이름은 신뢰할 수 없으므로 HTML로 넣기 전에 이스케이프
+    function escapeHtml(str) {
+      return String(str).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+
     function loadSheet(sheetName) {
+      const safeName = escapeHtml(sheetName);
       const json = XLSX.utils.sheet_to_json(workbookGlobal.Sheets[sheetName]);
       const loaded = json.filter(row => row['단어'] && row['뜻'])
                          .map(row => ({ word: row['단어'].toString(), meaning: row['뜻'].toString() }));
       if (loaded.length < 2) {
-        document.getElementById('statusText').innerHTML = `⚠️ <b>${sheetName}</b> 시트에 단어가 부족해요!`;
+        document.getElementById('statusText').innerHTML = `⚠️ <b>${safeName}</b> 시트에 단어가 부족해요!`;
         document.getElementById('setupControls').style.display = 'none';
         document.getElementById('startBtn').style.display = 'none';
         return;
       }
       wordsData = loaded;
       document.getElementById('statusText').innerHTML =
-        `📂 <b>${sheetName}</b> · 총 <b>${wordsData.length}</b>개 단어 준비 완료!`;
+        `📂 <b>${safeName}</b> · 총 <b>${wordsData.length}</b>개 단어 준비 완료!`;
       document.getElementById('setupControls').style.display = 'block';
       document.getElementById('startBtn').style.display = 'block';
     }
