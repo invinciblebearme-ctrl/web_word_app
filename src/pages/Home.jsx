@@ -1,7 +1,10 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import allRounds from '../data/all_rounds.json'
 import { wordImageUrl } from '../utils/image'
+import { loadProgress, roundSummary, getDueWords } from '../utils/progress'
+
+const ALL_WORDS = allRounds.flatMap((r) => r.words)
 
 function Home() {
   const [searchTerm, setSearchTerm] = useState('')
@@ -9,6 +12,8 @@ function Home() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const currentGroup = searchParams.get('group') || '전체'
+  const progress = useMemo(() => loadProgress(), [])
+  const dueCount = useMemo(() => getDueWords(ALL_WORDS, progress, Date.now(), Infinity).length, [progress])
 
   useEffect(() => {
     let filtered = allRounds;
@@ -49,6 +54,12 @@ function Home() {
         <h1 className="home-title">
           오늘의 영단어로 <span className="title-gradient-accent">실력 Up</span>
         </h1>
+
+        {dueCount > 0 && (
+          <button className="review-banner" onClick={() => navigate('/review')}>
+            🔁 오늘 복습할 단어가 <b>{dueCount}개</b> 있어요
+          </button>
+        )}
 
         <div className="search-container" style={{ display: 'flex', width: '310px', margin: '50px auto 20px', gap: '8px' }}>
           <input 
@@ -121,6 +132,20 @@ function Home() {
                     이미지<br/>준비중
                   </div>
                   <p>오늘의<br />영단어<br />{round.name.replace('오늘의 영단어 ', '')}</p>
+                  {(() => {
+                    const sum = roundSummary(round, progress)
+                    if (sum.seen === 0) return null
+                    const done = sum.mastered === sum.total
+                    return (
+                      <div
+                        className={`round-progress ${done ? 'done' : ''}`}
+                        title={`퀴즈로 익힌 단어 ${sum.studied}/${sum.total}, 완전히 앎 ${sum.mastered}`}
+                        aria-label={`익힌 단어 ${sum.studied}/${sum.total}`}
+                      >
+                        {done ? '✅' : <div className="round-progress-bar"><div style={{ width: `${Math.max(sum.studied / sum.total, 0.08) * 100}%` }} /></div>}
+                      </div>
+                    )
+                  })()}
                 </div>
               ))}
           </div>

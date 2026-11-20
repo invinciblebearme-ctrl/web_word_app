@@ -4,6 +4,8 @@ import WordChallenge from './pages/WordChallenge'
 import ScrambleHome from './pages/ScrambleHome'
 import ScrambleGame from './pages/ScrambleGame'
 import MyVocabulary from './pages/MyVocabulary'
+import RoundQuiz from './pages/RoundQuiz'
+import Review from './pages/Review'
 import Navbar from './components/Navbar'
 
 function App() {
@@ -16,6 +18,8 @@ function App() {
         <Route path="/scramble" element={<ScrambleHome />} />
         <Route path="/scramble-game/:id" element={<ScrambleGame />} />
         <Route path="/my-voca" element={<MyVocabulary />} />
+        <Route path="/quiz/:id" element={<RoundQuiz />} />
+        <Route path="/review" element={<Review />} />
       </Routes>
     </Router>
   )

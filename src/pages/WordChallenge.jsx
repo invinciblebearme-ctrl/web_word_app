@@ -3,6 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom'
 import allRounds from '../data/all_rounds.json'
 import { addToMyVoca, removeFromMyVoca, isFavorite } from '../utils/storage'
 import { wordImageUrl } from '../utils/image'
+import { markSeen } from '../utils/progress'
+import { speak, getSpeechRecognition } from '../utils/speech'
 
 function WordChallenge() {
   const { id } = useParams()
@@ -31,29 +33,7 @@ function WordChallenge() {
     setShowingEnglish(true)
   }
 
-  const speakWord = (word) => {
-    window.speechSynthesis.cancel();
-    if (!word) return;
-    
-    const utterance = new SpeechSynthesisUtterance(word);
-    
-    // 사용 가능한 음성 목록 가져오기
-    const voices = window.speechSynthesis.getVoices();
-    
-    // 영어(미국/영국) 음성 중 네이티브에 가까운 음성 우선 필터링
-    let selectedVoice = voices.find(v => v.lang === 'en-US' && v.name.includes('Google')) ||
-                        voices.find(v => v.lang === 'en-US' && v.name.includes('Samantha')) ||
-                        voices.find(v => v.lang.startsWith('en-US')) ||
-                        voices.find(v => v.lang.startsWith('en'));
-
-    if (selectedVoice) {
-      utterance.voice = selectedVoice;
-    }
-    
-    utterance.lang = 'en-US';
-    utterance.rate = 0.9; // 조금 더 또박또박하게 (기본 1.0)
-    window.speechSynthesis.speak(utterance);
-  };
+  const speakWord = speak
 
   const handleManualSpeak = () => {
     if (!roundData) return;
@@ -70,14 +50,18 @@ function WordChallenge() {
   const [isListening, setIsListening] = useState(false)
   const [pronunciationScore, setPronunciationScore] = useState(null)
   const [fav, setFav] = useState(false)
+  const [typedAnswer, setTypedAnswer] = useState('')
+  const sttSupported = !!getSpeechRecognition()
   
   // 단어가 바뀔 때마다 이미지 에러 및 발음 점수 초기화
   useEffect(() => {
     setImgError(false)
     setPronunciationScore(null)
     setShowingEnglish(true) // 단어 변경 시 영어부터 표시
+    setTypedAnswer('')
     if (currentWord) {
       setFav(isFavorite(currentWord.en))
+      markSeen(currentWord.en)
     }
   }, [index, id, currentWord])
 
@@ -96,6 +80,21 @@ function WordChallenge() {
   };
 
   if (!roundData) return <div className="challenge-body">데이터를 불러오는 중...</div>;
+
+  // 음성 인식 결과 또는 직접 입력한 답을 채점
+  // 음성 인식은 인식 오차가 있어 부분 일치도 Good으로, 직접 입력은 철자가 정확해야 정답
+  const gradeAnswer = (raw, { strict = false } = {}) => {
+    const transcript = raw.toLowerCase().trim();
+    if (!transcript) return;
+    const target = currentWord.en.toLowerCase().trim();
+    let level = 1; // Try Again
+    if (transcript === target) {
+      level = 3; // Excellent
+    } else if (!strict && (transcript.includes(target) || target.includes(transcript))) {
+      level = 2; // Good
+    }
+    setPronunciationScore({ transcript, level });
+  };
 
   // STT 발음 측정 시작
   const startSTT = () => {
@@ -126,17 +125,7 @@ function WordChallenge() {
     recognition.onend = () => setIsListening(false);
 
     recognition.onresult = (event) => {
-      const transcript = event.results[0][0].transcript.toLowerCase().trim();
-      const target = currentWord.en.toLowerCase().trim();
-      
-      let level = 1; // Try Again
-      if (transcript === target) {
-        level = 3; // Excellent
-      } else if (transcript.includes(target) || target.includes(transcript)) {
-        level = 2; // Good
-      }
-      
-      setPronunciationScore({ transcript, level });
+      gradeAnswer(event.results[0][0].transcript);
     };
 
     recognition.onerror = (event) => {
@@ -210,7 +199,8 @@ function WordChallenge() {
             {pronunciationScore.level === 3 && "Excellent! ⭐⭐⭐"}
             {pronunciationScore.level === 2 && "Good Job! ⭐⭐"}
             {pronunciationScore.level === 1 && "Try Again! ⭐"}
-            <div className="transcript-hint">인식된 발음: "{pronunciationScore.transcript}"</div>
+            <div className="transcript-hint">{sttSupported ? '인식된 발음' : '입력한 단어'}: "{pronunciationScore.transcript}"</div>
+            {pronunciationScore.level < 3 && <div className="transcript-hint">정답: "{currentWord.en}"</div>}
           </div>
         )}
 
@@ -221,16 +211,41 @@ function WordChallenge() {
           <button onClick={() => navigate('/')} className="nav-btn-premium">목록으로</button>
         </div>
 
-        <div className="stt-controls">
-          <button 
-            className={`mic-button ${isListening ? 'listening' : ''}`} 
-            onClick={startSTT}
-            disabled={isListening}
+        <button className="quiz-start-btn" onClick={() => navigate(`/quiz/${roundData.id}`)}>
+          📝 이 회차 퀴즈 풀기
+        </button>
+
+        {sttSupported ? (
+          <div className="stt-controls">
+            <button 
+              className={`mic-button ${isListening ? 'listening' : ''}`} 
+              onClick={startSTT}
+              disabled={isListening}
+            >
+              {isListening ? "🎤 측정중..." : "🎤 발음하기"}
+            </button>
+            <div className="mic-hint">※ 크롬, 엣지, 웨일 브라우저에서 발음 확인이 가능합니다.</div>
+          </div>
+        ) : (
+          <form
+            className="stt-controls"
+            onSubmit={(e) => { e.preventDefault(); gradeAnswer(typedAnswer, { strict: true }) }}
           >
-            {isListening ? "🎤 측정중..." : "🎤 발음하기"}
-          </button>
-          <div className="mic-hint">※ 크롬, 엣지, 웨일 브라우저에서 발음 확인이 가능합니다.</div>
-        </div>
+            <input
+              className="scramble-input"
+              value={typedAnswer}
+              onChange={(e) => setTypedAnswer(e.target.value)}
+              placeholder="단어를 써서 확인해 보세요"
+              autoCapitalize="none"
+              autoCorrect="off"
+              autoComplete="off"
+              spellCheck={false}
+              aria-label="단어 입력"
+            />
+            <button type="submit" className="mic-button" disabled={!typedAnswer.trim()}>✍️ 확인하기</button>
+            <div className="mic-hint">※ 이 브라우저는 음성 인식을 지원하지 않아 직접 써서 확인해요. (크롬·엣지·웨일에서는 발음 확인 가능)</div>
+          </form>
+        )}
       </div>
     </div>
   )

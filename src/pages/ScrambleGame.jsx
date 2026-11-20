@@ -1,8 +1,10 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import allRounds from '../data/all_rounds.json'
 import { addToMyVoca, removeFromMyVoca, isFavorite } from '../utils/storage'
 import { wordImageUrl } from '../utils/image'
+import { recordAnswer } from '../utils/progress'
+import { speak } from '../utils/speech'
 
 function ScrambleGame() {
   const { id } = useParams()
@@ -30,6 +32,8 @@ function ScrambleGame() {
   }
 
   const [fav, setFav] = useState(false)
+  // 단어별 첫 시도만 학습 기록에 반영 (여러 번 시도해서 맞힌 건 '앎'으로 치지 않음)
+  const recorded = useRef(new Set())
   
   useEffect(() => {
     if (currentWord) {
@@ -55,7 +59,13 @@ function ScrambleGame() {
   if (!roundData) return <div>게임을 찾을 수 없습니다.</div>
 
   const handleCheck = () => {
-    if (userInput.toLowerCase().trim() === currentWord.en.toLowerCase().trim()) {
+    if (!userInput.trim()) return
+    const correct = userInput.toLowerCase().trim() === currentWord.en.toLowerCase().trim()
+    if (!recorded.current.has(currentWord.en)) {
+      recorded.current.add(currentWord.en)
+      recordAnswer(currentWord.en, correct)
+    }
+    if (correct) {
       setFeedback({ level: 3, message: 'Excellent! ⭐⭐⭐' })
       handleSpeak()
       setShowImage(true) // Show image on correct answer
@@ -72,11 +82,7 @@ function ScrambleGame() {
     }, 800) // 0.8s spinner
   }
 
-  const handleSpeak = () => {
-    const utterance = new SpeechSynthesisUtterance(currentWord.en)
-    utterance.lang = 'en-US'
-    window.speechSynthesis.speak(utterance)
-  }
+  const handleSpeak = () => speak(currentWord.en)
 
   const nextWord = () => {
     if (index < roundData.words.length - 1) {
