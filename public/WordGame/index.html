@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>단어 팡팡 게임 · 오렌지 에디션</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+
+  <style>
+    :root {
+      --or:#E65100; --or-l:#FBE9E7; --or-d:#BF360C;
+      --ye:#F57F17; --ye-l:#FFF8E1; --ye-d:#6D4C00;
+      --bl:#1565C0; --bl-l:#E3F2FD; --bl-d:#0D47A1;
+      --gn:#2E7D32; --gn-l:#E8F5E9; --gn-d:#1B5E20;
+      --rd:#C62828; --rd-l:#FFEBEE;
+      --bg:#FFFAF5; --white:#FFFFFF;
+      --text:#1A1209; --sub:#5C4A30; --border:#FFE0B2;
+      --r:14px; --r-sm:8px;
+      --shadow:0 2px 12px rgba(230,81,0,.12);
+      --shadow-lg:0 8px 24px rgba(230,81,0,.18);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body, html {
+      width: 100%; height: 100%; overflow: hidden;
+      font-family: 'Noto Sans KR', sans-serif;
+      background: var(--bg); color: var(--text);
+    }
+
+    /* ── 카메라 배경 ── */
+    #cameraBackground {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      object-fit: cover; z-index: 0; transform: scaleX(-1);
+    }
+
+    /* ── 손 포인터 ── */
+    .hand-pointer {
+      position: absolute; width: 60px; height: 60px;
+      background: rgba(255,255,255,0.7);
+      border: 4px solid var(--or); border-radius: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 60;
+      box-shadow: 0 0 20px rgba(230,81,0,0.6), inset 0 0 10px #FFF;
+      pointer-events: none; display: none;
+      backdrop-filter: blur(3px);
+    }
+    .hand-pointer::after {
+      content: '🏀';
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -45%); font-size: 28px;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+    }
+
+    /* ── 1인 UI ── */
+    #uiContainer1P {
+      position: absolute; bottom: 36px; left: 50%; transform: translateX(-50%);
+      text-align: center; z-index: 10; display: none;
+    }
+    #targetMeaning1P {
+      display: inline-block;
+      padding: 14px 44px;
+      font-family: 'Baloo 2', sans-serif; font-size: 44px; font-weight: 800;
+      color: var(--or-d);
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(10px);
+      border: 2.5px solid var(--border);
+      border-radius: 50px;
+      box-shadow: var(--shadow-lg), inset 0 -3px 0 var(--border);
+      letter-spacing: -.5px;
+    }
+
+    #scoreBoard1P {
+      position: absolute; right: 28px; top: 24px;
+      background: rgba(255,248,225,0.95);
+      padding: 12px 30px; border-radius: 40px;
+      font-family: 'Baloo 2', sans-serif; font-size: 36px; font-weight: 800;
+      color: var(--or-d); display: none;
+      border: 2px solid var(--border);
+      box-shadow: var(--shadow);
+      z-index: 10;
+    }
+
+    /* ── 2인 경계선 ── */
+    #divider2P {
+      display: none; position: absolute; left: 50%; top: 0; bottom: 0; width: 10px;
+      background: repeating-linear-gradient(
+        to bottom, var(--or) 0, var(--or) 24px, transparent 24px, transparent 50px
+      );
+      z-index: 6; transform: translateX(-50%); border-radius: 8px;
+      filter: drop-shadow(0 0 8px rgba(230,81,0,0.6));
+    }
+    #vsBadge {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      background: var(--or); color: #fff;
+      font-family: 'Baloo 2', sans-serif; font-size: 42px; font-weight: 800;
+      padding: 14px 18px; border-radius: 50%;
+      border: 5px solid #fff; box-shadow: var(--shadow-lg);
+    }
+
+    /* ── 2인 플레이어 UI ── */
+    #uiP1 {
+      display: none; position: absolute; left: 24px; top: 24px;
+      background: rgba(227,242,253,0.95);
+      color: var(--bl-d); padding: 12px 20px; border-radius: 40px;
+      align-items: center; gap: 16px;
+      box-shadow: var(--shadow); z-index: 10;
+      border: 2px solid rgba(21,101,192,0.2);
+    }
+    #uiP1 .score { font-family: 'Baloo 2', sans-serif; font-size: 28px; font-weight: 700; }
+    #uiP1 .target {
+      font-family: 'Baloo 2', sans-serif; font-size: 34px; font-weight: 800;
+      background: var(--white); color: var(--bl-d);
+      padding: 8px 26px; border-radius: 24px;
+      box-shadow: inset 0 -2px 4px rgba(0,0,0,0.08);
+    }
+
+    #uiP2 {
+      display: none; position: absolute; right: 24px; top: 24px;
+      background: rgba(251,233,231,0.95);
+      color: var(--or-d); padding: 12px 20px; border-radius: 40px;
+      align-items: center; gap: 16px;
+      box-shadow: var(--shadow); z-index: 10;
+      flex-direction: row-reverse;
+      border: 2px solid rgba(230,81,0,0.2);
+    }
+    #uiP2 .score { font-family: 'Baloo 2', sans-serif; font-size: 28px; font-weight: 700; }
+    #uiP2 .target {
+      font-family: 'Baloo 2', sans-serif; font-size: 34px; font-weight: 800;
+      background: var(--white); color: var(--or-d);
+      padding: 8px 26px; border-radius: 24px;
+      box-shadow: inset 0 -2px 4px rgba(0,0,0,0.08);
+    }
+
+    /* ── 타이머 ── */
+    #timerBoard {
+      position: absolute; left: 50%; transform: translateX(-50%); top: 24px;
+      background: rgba(230,81,0,0.92);
+      padding: 12px 36px; border-radius: 40px;
+      font-family: 'Baloo 2', sans-serif; font-size: 38px; font-weight: 800;
+      color: #fff; box-shadow: var(--shadow-lg);
+      z-index: 15; border: 2px solid rgba(255,255,255,0.3);
+      text-shadow: 0 1px 2px rgba(0,0,0,0.15); display: none;
+    }
+
+    /* ── 떨어지는 단어 ── */
+    .falling-word {
+      position: absolute; padding: 16px 38px;
+      border-radius: 50px;
+      font-family: 'Baloo 2', sans-serif; font-size: 40px; font-weight: 800;
+      cursor: pointer; user-select: none;
+      box-shadow: var(--shadow-lg), inset 0 4px 8px rgba(255,255,255,0.7);
+      white-space: nowrap; transition: transform 0.08s;
+      border: 2.5px solid rgba(255,255,255,0.6); z-index: 20;
+      letter-spacing: -.3px;
+    }
+    .word-1p {
+      background: linear-gradient(135deg, #FBE9E7 0%, #FFCCBC 100%);
+      color: var(--or-d);
+      border-color: var(--border);
+    }
+    .word-p1 {
+      background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%);
+      color: var(--bl-d);
+      border-color: rgba(21,101,192,0.25);
+    }
+    .word-p2 {
+      background: linear-gradient(135deg, #FFF8E1 0%, #FFE082 100%);
+      color: var(--ye-d);
+      border-color: rgba(245,127,23,0.3);
+    }
+
+    /* ── 애니메이션 ── */
+    @keyframes popOut {
+      0%   { transform: scale(1); opacity: 1; }
+      50%  { transform: scale(1.35) rotate(8deg); opacity: .85; }
+      100% { transform: scale(0); opacity: 0; }
+    }
+    .correct-anim {
+      animation: popOut .4s ease-out forwards;
+      background: var(--gn-l) !important;
+      border-color: var(--gn-d) !important;
+      color: var(--gn-d) !important;
+      pointer-events: none;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25%, 75%  { transform: translateX(-16px) rotate(-8deg); }
+      50%        { transform: translateX(16px) rotate(8deg); }
+    }
+    .wrong-anim {
+      animation: shake .38s ease-in-out forwards;
+      background: var(--rd-l) !important;
+      border-color: var(--rd) !important;
+      color: var(--rd) !important;
+      pointer-events: none;
+    }
+
+    /* ── 오버레이 ── */
+    #overlay {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(255,250,245,0.97);
+      display: flex; flex-direction: column;
+      justify-content: center; align-items: center;
+      z-index: 100; text-align: center;
+      padding: 20px;
+    }
+
+    /* Hero 타이틀 영역 */
+    .overlay-hero {
+      background: linear-gradient(135deg, #E65100 0%, #FF6D00 45%, #FF8F00 80%, #F9A825 100%);
+      border-radius: 24px;
+      padding: 28px 48px 24px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-lg);
+      position: relative; overflow: hidden;
+    }
+    .overlay-hero::before {
+      content: '🏀'; position: absolute;
+      font-size: 80px; opacity: .1; top: -10px; left: -10px;
+      transform: rotate(-20deg);
+    }
+    .overlay-hero::after {
+      content: '⭐'; position: absolute;
+      font-size: 60px; opacity: .1; bottom: -5px; right: 5px;
+      transform: rotate(15deg);
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: rgba(255,255,255,.2);
+      border: 1px solid rgba(255,255,255,.4);
+      border-radius: 20px; padding: 4px 12px;
+      font-size: .72rem; font-weight: 700; color: #fff;
+      letter-spacing: .08em; margin-bottom: .7rem;
+    }
+    .overlay-hero h1 {
+      font-family: 'Baloo 2', sans-serif;
+      font-size: clamp(1.8rem, 6vw, 3rem); font-weight: 800;
+      color: #fff; line-height: 1.1; margin-bottom: .3rem;
+    }
+    .overlay-hero h1 span { color: #FFF176; }
+    .overlay-hero p { font-size: .88rem; color: rgba(255,255,255,.82); }
+
+    /* 상태 텍스트 */
+    #statusText {
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: 1.1rem; color: var(--sub);
+      margin-bottom: 4px;
+    }
+    #statusText b { color: var(--or); }
+
+    /* 업로드 버튼 */
+    .file-upload-wrapper { position: relative; overflow: hidden; display: inline-block; margin-top: 16px; }
+    .file-upload-wrapper input[type=file] {
+      font-size: 100px; position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer;
+    }
+
+    /* 버튼 */
+    .btn {
+      padding: 13px 36px;
+      font-family: 'Baloo 2', sans-serif; font-size: 1.15rem; font-weight: 800;
+      background: var(--or); color: #fff;
+      border: none; border-radius: 40px; cursor: pointer;
+      box-shadow: 0 6px 0 var(--or-d), var(--shadow);
+      margin: 10px; transition: transform .1s, box-shadow .1s;
+      letter-spacing: .02em;
+    }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 0 var(--or-d), var(--shadow-lg); }
+    .btn:active { transform: translateY(6px); box-shadow: 0 0 0 var(--or-d), 0 2px 6px rgba(0,0,0,0.15); }
+
+    #startBtn {
+      background: var(--gn); color: #fff;
+      box-shadow: 0 6px 0 var(--gn-d), var(--shadow);
+      display: none; font-size: 1.3rem;
+      padding: 16px 52px; margin-top: 20px;
+    }
+    #startBtn:hover { box-shadow: 0 8px 0 var(--gn-d), var(--shadow-lg); }
+    #startBtn:active { transform: translateY(6px); box-shadow: 0 0 0 var(--gn-d); }
+
+    /* 설정 패널 */
+    #setupControls {
+      display: none; margin-top: 16px;
+      background: var(--white);
+      padding: 24px 32px; border-radius: 20px;
+      text-align: left; min-width: 480px;
+      box-shadow: var(--shadow);
+      border: 2px solid var(--border);
+    }
+    .control-row { margin-bottom: 16px; display: flex; align-items: center; }
+    .control-row:last-child { margin-bottom: 0; }
+    .ctrl-label {
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: .92rem; font-weight: 700;
+      color: var(--sub); min-width: 130px;
+    }
+    .select-style {
+      font-family: 'Noto Sans KR', sans-serif; font-size: .9rem; font-weight: 500;
+      padding: 9px 14px; border-radius: var(--r-sm);
+      flex: 1; border: 1.5px solid var(--border);
+      background: var(--bg); color: var(--text); cursor: pointer;
+      transition: border-color .2s;
+    }
+    .select-style:focus { outline: none; border-color: var(--or); }
+
+    /* 구분선 */
+    .ctrl-divider {
+      height: 1px; background: var(--border);
+      margin: 4px 0 16px; border-radius: 1px;
+    }
+
+    /* ── 시트 선택 ── */
+    #sheetSelectWrap {
+      display: none; margin-top: 14px;
+      background: var(--white); border: 2px solid var(--border);
+      border-radius: 16px; padding: 16px 20px;
+      min-width: 480px; box-shadow: var(--shadow);
+    }
+    #sheetSelectWrap p {
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: .82rem; color: var(--sub);
+      margin-bottom: 10px; font-weight: 700;
+    }
+    .sheet-btn-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+    .sheet-btn {
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: .85rem; font-weight: 700;
+      padding: 8px 16px; border-radius: 20px; cursor: pointer;
+      border: 2px solid var(--border);
+      background: var(--bg); color: var(--sub);
+      transition: all .15s;
+    }
+    .sheet-btn:hover { border-color: var(--or); color: var(--or); background: var(--or-l); }
+    .sheet-btn.active {
+      background: var(--or); color: #fff;
+      border-color: var(--or-d);
+      box-shadow: 0 3px 0 var(--or-d);
+    }
+
+    /* AI 로딩 */
+    #aiLoadingMsg {
+      font-family: 'Noto Sans KR', sans-serif;
+      color: var(--gn-d); font-size: .88rem; display: none;
+      text-align: center; margin-top: 10px;
+      background: var(--gn-l); padding: 8px 18px;
+      border-radius: 20px; border: 1px solid rgba(46,125,50,0.2);
+    }
+
+    /* 결과 카드 */
+    .result-card {
+      background: var(--white); border: 1.5px solid var(--border);
+      border-radius: var(--r); padding: 1.2rem 1.8rem;
+      box-shadow: var(--shadow);
+    }
+  </style>
+</head>
+<body>
+
+  <video id="cameraBackground" autoplay playsinline></video>
+
+  <div id="handPointer0" class="hand-pointer"></div>
+  <div id="handPointer1" class="hand-pointer"></div>
+
+  <div id="divider2P">
+    <div id="vsBadge">VS</div>
+  </div>
+
+  <div id="timerBoard">⏰ <span id="timer">60</span>초</div>
+
+  <div id="scoreBoard1P">⭐ <span id="score1P">0</span>점</div>
+  <div id="uiContainer1P">
+    <div id="targetMeaning1P">뜻</div>
+  </div>
+
+  <div id="uiP1">
+    <span class="score">💎 <span id="scoreP1">0</span></span>
+    <span class="target" id="targetP1">뜻</span>
+  </div>
+
+  <div id="uiP2">
+    <span class="score">🔥 <span id="scoreP2">0</span></span>
+    <span class="target" id="targetP2">뜻</span>
+  </div>
+
+  <!-- ── 오버레이 ── -->
+  <div id="overlay">
+
+    <div class="overlay-hero">
+      <div class="hero-badge">🎮 WORD GAME</div>
+      <h1>단어 <span>팡팡</span> 게임</h1>
+      <p>떨어지는 단어를 터치해서 맞춰보세요!</p>
+    </div>
+
+    <p id="statusText">단어장(엑셀 파일)을 선택해주세요!</p>
+
+    <div class="file-upload-wrapper" id="uploadWrapper">
+      <button class="btn">📁 엑셀 파일 고르기</button>
+      <input type="file" id="excelFile" accept=".xlsx, .xls" />
+    </div>
+
+    <!-- 시트 선택 -->
+    <div id="sheetSelectWrap">
+      <p>📂 단원을 선택하세요</p>
+      <div class="sheet-btn-grid" id="sheetBtnGrid"></div>
+    </div>
+
+    <div id="setupControls">
+      <div class="ctrl-divider"></div>
+
+      <div class="control-row">
+        <span class="ctrl-label">📷 화면 방향</span>
+        <select id="mirrorSelect" class="select-style" onchange="toggleMirror()">
+          <option value="mirror" selected>✨ 내 앞의 화면 (거울 모드)</option>
+          <option value="normal">반대편 화면 (교차 모드)</option>
+        </select>
+      </div>
+
+      <div class="control-row">
+        <span class="ctrl-label">🕹️ 게임 모드</span>
+        <select id="gameModeSelect" class="select-style" onchange="toggleSetupUI()">
+          <option value="1">👤 1인 / 다함께 모드</option>
+          <option value="2">⚔️ 2인 반반 대결 모드</option>
+        </select>
+      </div>
+
+      <div class="control-row">
+        <span class="ctrl-label">⏱️ 게임 시간</span>
+        <select id="gameTimeSelect" class="select-style">
+          <option value="30">30초 (빠르게)</option>
+          <option value="60" selected>60초 (보통)</option>
+          <option value="90">90초 (여유롭게)</option>
+          <option value="120">120초 (넉넉하게)</option>
+        </select>
+      </div>
+
+      <div class="control-row" id="targetScoreDiv">
+        <span class="ctrl-label">🎯 목표 점수</span>
+        <select id="targetScoreSelect" class="select-style">
+          <option value="100" selected>100점 (보통)</option>
+          <option value="150">150점 (어려움)</option>
+          <option value="infinite">무제한 타임어택</option>
+        </select>
+      </div>
+
+      <div class="control-row">
+        <span class="ctrl-label">👆 조작 방법</span>
+        <select id="inputTypeSelect" class="select-style" onchange="initAiIfSelected()">
+          <option value="touch" selected>터치 및 마우스</option>
+          <option value="motion">✨ 허공 터치 (모션 인식)</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="aiLoadingMsg">🤖 AI가 똑똑해지는 중이에요... (약 3초)</div>
+    <button id="startBtn" class="btn" onclick="startGame()">🚀 출발하기!</button>
+  </div>
+
+  <script>
+    let wordsData = [];
+    let currentMode = '1';
+    let inputMode = 'touch';
+    let isMirrored = true;
+
+    let target1P = null; let score1P = 0;
+    let targetP1 = null; let scoreP1 = 0;
+    let targetP2 = null; let scoreP2 = 0;
+
+    let timeLeft = 60; let targetScore = 100;
+    let gameInterval; let spawnInterval; let timerInterval;
+    let activeWords = []; let isGameOver = false;
+
+    let handsModel = null;
+    let isAiLoaded = false;
+    let lastVideoTime = -1;
+    let isAiProcessing = false;
+    const videoElement = document.getElementById('cameraBackground');
+
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    function playSound(type) {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+      osc.connect(gainNode); gainNode.connect(audioCtx.destination);
+      if (type === 'correct') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(659.25, audioCtx.currentTime);
+        osc.frequency.setValueAtTime(880.00, audioCtx.currentTime + 0.1);
+        gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+        osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+      } else if (type === 'wrong') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+        osc.frequency.setValueAtTime(200, audioCtx.currentTime + 0.2);
+        gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+        osc.start(); osc.stop(audioCtx.currentTime + 0.4);
+      } else if (type === 'victory') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
+        osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.1);
+        osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.2);
+        osc.frequency.setValueAtTime(1046.50, audioCtx.currentTime + 0.3);
+        gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.8);
+        osc.start(); osc.stop(audioCtx.currentTime + 0.8);
+      }
+    }
+
+    async function initCamera() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        videoElement.srcObject = stream;
+      } catch (err) { alert('카메라 권한을 허용해 주세요!'); }
+    }
+
+    function toggleMirror() {
+      isMirrored = document.getElementById('mirrorSelect').value === 'mirror';
+      videoElement.style.transform = isMirrored ? 'scaleX(-1)' : 'none';
+    }
+
+    function initAiIfSelected() {
+      inputMode = document.getElementById('inputTypeSelect').value;
+      if (inputMode === 'motion' && !isAiLoaded) {
+        document.getElementById('aiLoadingMsg').style.display = 'block';
+        document.getElementById('startBtn').style.opacity = '0.5';
+        document.getElementById('startBtn').disabled = true;
+
+        handsModel = new Hands({ locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}` });
+        handsModel.setOptions({ maxNumHands: 2, modelComplexity: 0, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5 });
+        handsModel.onResults(onAiResults);
+
+        handsModel.initialize().then(() => {
+          isAiLoaded = true;
+          document.getElementById('aiLoadingMsg').innerText = '✨ 준비 완료!';
+          setTimeout(() => document.getElementById('aiLoadingMsg').style.display = 'none', 1500);
+          document.getElementById('startBtn').style.opacity = '1';
+          document.getElementById('startBtn').disabled = false;
+        });
+      }
+    }
+
+    function onAiResults(results) {
+      document.getElementById('handPointer0').style.display = 'none';
+      document.getElementById('handPointer1').style.display = 'none';
+      if (results.multiHandLandmarks && inputMode === 'motion' && !isGameOver) {
+        for (let i = 0; i < results.multiHandLandmarks.length; i++) {
+          if (i > 1) break;
+          const indexTip = results.multiHandLandmarks[i][8];
+          const px = isMirrored ? (1 - indexTip.x) * window.innerWidth : indexTip.x * window.innerWidth;
+          const py = indexTip.y * window.innerHeight;
+          const pointerEl = document.getElementById('handPointer' + i);
+          pointerEl.style.display = 'block';
+          pointerEl.style.left = px + 'px';
+          pointerEl.style.top = py + 'px';
+          checkMotionCollision(px, py);
+        }
+      }
+    }
+
+    function checkMotionCollision(px, py) {
+      for (let i = 0; i < activeWords.length; i++) {
+        let w = activeWords[i];
+        if (w.speed === 0) continue;
+        if (currentMode === '2') {
+          const hw = window.innerWidth / 2;
+          if (w.player === 1 && px > hw) continue;
+          if (w.player === 2 && px < hw) continue;
+        }
+        let rect = w.element.getBoundingClientRect();
+        const pad = 40;
+        if (px > rect.left - pad && px < rect.right + pad && py > rect.top - pad && py < rect.bottom + pad) {
+          checkWord(w.element, w.wordObj, w.player);
+        }
+      }
+    }
+
+    function updatePositions() {
+      if (isGameOver) return;
+      if (inputMode === 'motion' && isAiLoaded && videoElement.readyState >= 2) {
+        if (videoElement.currentTime !== lastVideoTime && !isAiProcessing) {
+          isAiProcessing = true; lastVideoTime = videoElement.currentTime;
+          handsModel.send({ image: videoElement }).then(() => { isAiProcessing = false; });
+        }
+      }
+      for (let i = activeWords.length - 1; i >= 0; i--) {
+        let w = activeWords[i];
+        w.y += w.speed; w.element.style.top = w.y + 'px';
+        if (w.y > window.innerHeight) { w.element.remove(); activeWords.splice(i, 1); }
+      }
+      gameInterval = requestAnimationFrame(updatePositions);
+    }
+
+    let workbookGlobal = null;
+
+    document.getElementById('excelFile').addEventListener('change', function (e) {
+      const file = e.target.files[0]; if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const data = new Uint8Array(e.target.result);
+        workbookGlobal = XLSX.read(data, { type: 'array' });
+        const sheetNames = workbookGlobal.SheetNames;
+
+        // 시트가 1개면 바로 로드
+        if (sheetNames.length === 1) {
+          loadSheet(sheetNames[0]);
+          return;
+        }
+
+        // 시트가 여러 개면 선택 UI 표시
+        document.getElementById('uploadWrapper').style.display = 'none';
+        const grid = document.getElementById('sheetBtnGrid');
+        grid.innerHTML = '';
+
+        sheetNames.forEach((name, idx) => {
+          const btn = document.createElement('button');
+          btn.className = 'sheet-btn';
+          btn.textContent = name;
+          btn.onclick = () => {
+            document.querySelectorAll('.sheet-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            loadSheet(name);
+          };
+          grid.appendChild(btn);
+          // 첫 번째 시트 자동 선택
+          if (idx === 0) { btn.classList.add('active'); loadSheet(name); }
+        });
+
+        document.getElementById('sheetSelectWrap').style.display = 'block';
+      };
+      reader.readAsArrayBuffer(file);
+    });
+
+    function loadSheet(sheetName) {
+      const json = XLSX.utils.sheet_to_json(workbookGlobal.Sheets[sheetName]);
+      const loaded = json.filter(row => row['단어'] && row['뜻'])
+                         .map(row => ({ word: row['단어'].toString(), meaning: row['뜻'].toString() }));
+      if (loaded.length < 2) {
+        document.getElementById('statusText').innerHTML = `⚠️ <b>${sheetName}</b> 시트에 단어가 부족해요!`;
+        document.getElementById('setupControls').style.display = 'none';
+        document.getElementById('startBtn').style.display = 'none';
+        return;
+      }
+      wordsData = loaded;
+      document.getElementById('statusText').innerHTML =
+        `📂 <b>${sheetName}</b> · 총 <b>${wordsData.length}</b>개 단어 준비 완료!`;
+      document.getElementById('setupControls').style.display = 'block';
+      document.getElementById('startBtn').style.display = 'block';
+    }
+
+    window.onload = () => { initCamera(); toggleMirror(); };
+
+    function toggleSetupUI() {
+      currentMode = document.getElementById('gameModeSelect').value;
+      document.getElementById('targetScoreDiv').style.display = currentMode === '1' ? 'flex' : 'none';
+    }
+
+    function startGame() {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      clearInterval(spawnInterval); clearInterval(timerInterval); cancelAnimationFrame(gameInterval);
+      currentMode = document.getElementById('gameModeSelect').value;
+      inputMode = document.getElementById('inputTypeSelect').value;
+      timeLeft = parseInt(document.getElementById('gameTimeSelect').value); isGameOver = false;
+      activeWords.forEach(w => w.element.remove()); activeWords = [];
+      document.getElementById('handPointer0').style.display = 'none';
+      document.getElementById('handPointer1').style.display = 'none';
+      document.getElementById('uiContainer1P').style.display = 'none';
+      document.getElementById('scoreBoard1P').style.display = 'none';
+      document.getElementById('uiP1').style.display = 'none';
+      document.getElementById('uiP2').style.display = 'none';
+      document.getElementById('divider2P').style.display = 'none';
+      document.getElementById('timer').innerText = timeLeft;
+      document.getElementById('timerBoard').style.display = 'block';
+
+      if (currentMode === '1') {
+        score1P = 0; document.getElementById('score1P').innerText = score1P;
+        targetScore = document.getElementById('targetScoreSelect').value === 'infinite' ? Infinity : parseInt(document.getElementById('targetScoreSelect').value);
+        document.getElementById('uiContainer1P').style.display = 'block';
+        document.getElementById('scoreBoard1P').style.display = 'block';
+        setNewTarget(0);
+      } else {
+        scoreP1 = 0; scoreP2 = 0;
+        document.getElementById('scoreP1').innerText = scoreP1;
+        document.getElementById('scoreP2').innerText = scoreP2;
+        document.getElementById('uiP1').style.display = 'flex';
+        document.getElementById('uiP2').style.display = 'flex';
+        document.getElementById('divider2P').style.display = 'block';
+        setNewTarget(1); setNewTarget(2);
+      }
+
+      document.getElementById('overlay').style.display = 'none';
+      gameInterval = requestAnimationFrame(updatePositions);
+      spawnInterval = setInterval(spawnWord, currentMode === '1' ? 1200 : 1500);
+      timerInterval = setInterval(updateTimer, 1000);
+    }
+
+    function updateTimer() {
+      if (isGameOver || document.hidden) return;
+      timeLeft--; document.getElementById('timer').innerText = timeLeft;
+      if (timeLeft <= 0) endGame('timeout');
+    }
+
+    function setNewTarget(player) {
+      if (isGameOver) return;
+      const randomWord = wordsData[Math.floor(Math.random() * wordsData.length)];
+      if (player === 0) { target1P = randomWord; document.getElementById('targetMeaning1P').innerText = target1P.meaning; }
+      else if (player === 1) { targetP1 = randomWord; document.getElementById('targetP1').innerText = targetP1.meaning; }
+      else if (player === 2) { targetP2 = randomWord; document.getElementById('targetP2').innerText = targetP2.meaning; }
+    }
+
+    function spawnWord() {
+      if (isGameOver || document.hidden) return;
+      const maxWords = currentMode === '1' ? 8 : 14;
+      if (activeWords.length >= maxWords) return;
+      if (currentMode === '1') {
+        createWordElement(0, target1P, Math.random() * (window.innerWidth - 300));
+      } else {
+        const hw = window.innerWidth / 2;
+        createWordElement(1, targetP1, Math.random() * (hw - 300));
+        createWordElement(2, targetP2, hw + 50 + Math.random() * (hw - 300));
+      }
+    }
+
+    function createWordElement(player, currentTargetObj, startLeft) {
+      const isTarget = Math.random() > 0.5;
+      const wordObj = isTarget ? currentTargetObj : wordsData[Math.floor(Math.random() * wordsData.length)];
+      const wordEl = document.createElement('div');
+      wordEl.className = 'falling-word';
+      if (player === 0) wordEl.classList.add('word-1p');
+      else if (player === 1) wordEl.classList.add('word-p1');
+      else if (player === 2) wordEl.classList.add('word-p2');
+      wordEl.innerText = wordObj.word;
+      wordEl.style.left = startLeft + 'px';
+      wordEl.style.top = '-120px';
+      const handleTouch = (e) => { e.preventDefault(); checkWord(wordEl, wordObj, player); };
+      wordEl.addEventListener('mousedown', () => checkWord(wordEl, wordObj, player));
+      wordEl.addEventListener('touchstart', handleTouch);
+      document.body.appendChild(wordEl);
+      activeWords.push({ element: wordEl, wordObj: wordObj, y: -120, speed: 2.5 + Math.random() * 3, player: player });
+    }
+
+    function checkWord(element, wordObj, player) {
+      if (isGameOver) return;
+      const wordData = activeWords.find(w => w.element === element);
+      if (!wordData || wordData.speed === 0) return;
+      wordData.speed = 0;
+      let isCorrect = false;
+      if (player === 0) isCorrect = (wordObj.word === target1P.word);
+      else if (player === 1) isCorrect = (wordObj.word === targetP1.word);
+      else if (player === 2) isCorrect = (wordObj.word === targetP2.word);
+
+      if (isCorrect) {
+        playSound('correct'); element.classList.add('correct-anim');
+        if (player === 0) { score1P += 10; document.getElementById('score1P').innerText = score1P; setNewTarget(0); if (score1P >= targetScore) setTimeout(() => endGame('targetReached'), 400); }
+        else if (player === 1) { scoreP1 += 10; document.getElementById('scoreP1').innerText = scoreP1; setNewTarget(1); }
+        else if (player === 2) { scoreP2 += 10; document.getElementById('scoreP2').innerText = scoreP2; setNewTarget(2); }
+      } else {
+        playSound('wrong'); element.classList.add('wrong-anim');
+        if (player === 0) { score1P = Math.max(0, score1P - 5); document.getElementById('score1P').innerText = score1P; }
+        else if (player === 1) { scoreP1 = Math.max(0, scoreP1 - 5); document.getElementById('scoreP1').innerText = scoreP1; }
+        else if (player === 2) { scoreP2 = Math.max(0, scoreP2 - 5); document.getElementById('scoreP2').innerText = scoreP2; }
+      }
+      setTimeout(() => { element.remove(); activeWords = activeWords.filter(w => w.element !== element); }, 400);
+    }
+
+    function endGame(reason) {
+      isGameOver = true;
+      clearInterval(spawnInterval); clearInterval(timerInterval); cancelAnimationFrame(gameInterval);
+      document.getElementById('handPointer0').style.display = 'none';
+      document.getElementById('handPointer1').style.display = 'none';
+
+      const statusText = document.getElementById('statusText');
+      document.getElementById('startBtn').innerText = '🔄 한 번 더 하기!';
+
+      if (currentMode === '1') {
+        if (reason === 'targetReached') {
+          playSound('victory');
+          statusText.innerHTML = `🎉 <span style="font-family:'Baloo 2',sans-serif;color:var(--or);font-size:1.6rem;font-weight:800">미션 성공! 최고야!</span> 🎉<br><br><span style="font-size:1rem;color:var(--sub)">⏰ 남은 시간: ${timeLeft}초</span>`;
+        } else {
+          playSound('wrong');
+          statusText.innerHTML = `⏱️ <span style="font-family:'Baloo 2',sans-serif;color:var(--rd);font-size:1.6rem;font-weight:800">아쉬워요, 타임아웃!</span> ⏱️<br><br><span style="font-size:1rem;color:var(--sub)">⭐ 최종 점수: ${score1P}점</span>`;
+        }
+      } else {
+        playSound('victory');
+        let resultHtml = `<span style="font-family:'Baloo 2',sans-serif;color:var(--or);font-size:1.5rem;font-weight:800">경기 끝!</span><br><br>`;
+        resultHtml += `<span style="font-family:'Baloo 2',sans-serif;color:var(--bl-d);font-size:1.2rem;font-weight:700">💎 P1: ${scoreP1}점</span> <span style="color:var(--sub)"> vs </span> <span style="font-family:'Baloo 2',sans-serif;color:var(--or-d);font-size:1.2rem;font-weight:700">🔥 P2: ${scoreP2}점</span><br><br>`;
+        if (scoreP1 > scoreP2) resultHtml += `<span style="font-family:'Baloo 2',sans-serif;font-size:1.7rem;font-weight:800;color:var(--bl-d)">🏆 왼쪽(P1) 승리!</span>`;
+        else if (scoreP2 > scoreP1) resultHtml += `<span style="font-family:'Baloo 2',sans-serif;font-size:1.7rem;font-weight:800;color:var(--or-d)">🏆 오른쪽(P2) 승리!</span>`;
+        else resultHtml += `<span style="font-family:'Baloo 2',sans-serif;font-size:1.7rem;font-weight:800;color:var(--gn-d)">🤝 무승부!</span>`;
+        statusText.innerHTML = resultHtml;
+      }
+      document.getElementById('overlay').style.display = 'flex';
+    }
+  </script>
+</body>
+</html>

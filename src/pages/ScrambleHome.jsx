@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import allRounds from '../data/all_rounds.json'
+import { wordImageUrl } from '../utils/image'
 
 function ScrambleHome() {
   const [searchTerm, setSearchTerm] = useState('')
@@ -99,7 +100,7 @@ function ScrambleHome() {
               .map(round => (
                 <div key={round.id} className="item" onClick={() => navigate(`/scramble-game/${round.id}`)}>
                   <img 
-                    src={`https://word-assets.pages.dev/${window.atob(round.words[0].img)}`} 
+                    src={wordImageUrl(round.words[0].img)} 
                     alt={round.name}
                     style={{ objectFit: 'contain' }}
                     onError={(e) => {

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import allRounds from '../data/all_rounds.json'
 import { addToMyVoca, removeFromMyVoca, isFavorite } from '../utils/storage'
+import { wordImageUrl } from '../utils/image'
 
 function WordChallenge() {
   const { id } = useParams()
@@ -63,7 +64,7 @@ function WordChallenge() {
   };
 
   const currentWord = roundData?.words[index]
-  const imgUrl = currentWord?.img ? `https://word-assets.pages.dev/${window.atob(currentWord.img)}` : null
+  const imgUrl = wordImageUrl(currentWord?.img)
 
   const [imgError, setImgError] = useState(false)
   const [isListening, setIsListening] = useState(false)

@@ -3,10 +3,11 @@ import { useNavigate } from 'react-router-dom'
 import { getMyVoca, removeFromMyVoca } from '../utils/storage'
 import jsPDF from 'jspdf'
 import html2canvas from 'html2canvas'
+import { wordImageUrl } from '../utils/image'
 
 function VocaItem({ word, handleDelete, speakWord }) {
   const [showKo, setShowKo] = useState(false);
-  const imgUrl = word.img ? `https://word-assets.pages.dev/${window.atob(word.img)}` : null;
+  const imgUrl = wordImageUrl(word.img);
 
   return (
     <div
@@ -220,7 +221,7 @@ function MyVocabulary() {
 
                 <div style={{ width: '100%' }}>
                   {vocaList.map((word, idx) => {
-                    const imgUrl = word.img ? `https://word-assets.pages.dev/${window.atob(word.img)}` : null;
+                    const imgUrl = wordImageUrl(word.img);
 
                     // 짝수 인덱스는 왼쪽, 홀수 인덱스는 오른쪽 배치
                     const isEven = idx % 2 === 0;

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import allRounds from '../data/all_rounds.json'
 import { addToMyVoca, removeFromMyVoca, isFavorite } from '../utils/storage'
+import { wordImageUrl } from '../utils/image'
 
 function ScrambleGame() {
   const { id } = useParams()
@@ -94,7 +95,7 @@ function ScrambleGame() {
     setUserInput(prev => prev + letter)
   }
 
-  const imgUrl = currentWord ? `https://word-assets.pages.dev/${window.atob(currentWord.img)}` : null
+  const imgUrl = currentWord ? wordImageUrl(currentWord.img) : null
 
   return (
     <div className="challenge-body scramble-game">
