@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import allRounds from '../data/all_rounds.json'
 import { wordImageUrl } from '../utils/image'
+import { clickable } from '../utils/a11y'
 import { loadProgress, roundSummary, getDueWords } from '../utils/progress'
 
 const ALL_WORDS = allRounds.flatMap((r) => r.words)
@@ -111,12 +112,12 @@ function Home() {
             {filteredRounds
               .filter(r => r.category === category)
               .map(round => (
-                <div key={round.id} className="item" onClick={() => navigate(`/challenge/${round.id}`)}>
+                <div key={round.id} className="item" {...clickable(() => navigate(`/challenge/${round.id}`), round.name)}>
                   <img 
                     src={wordImageUrl(round.words[0].img)} 
                     loading="lazy"
                     decoding="async"
-                    alt={round.name}
+                    alt=""
                     style={{ objectFit: 'contain' }}
                     onError={(e) => {
                       e.target.style.display = 'none';
@@ -151,6 +152,11 @@ function Home() {
           </div>
         </div>
       ))}
+
+      <footer className="home-extras">
+        <a href="./WordGame/" className="extra-link">🎮 단어 팡팡 게임 <small>(웹캠 손동작)</small></a>
+        <a href="./quizn/" className="extra-link">🔗 퀴즈앤 링크 모음</a>
+      </footer>
     </div>
   )
 }

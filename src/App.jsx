@@ -7,9 +7,11 @@ import MyVocabulary from './pages/MyVocabulary'
 import RoundQuiz from './pages/RoundQuiz'
 import Review from './pages/Review'
 import Navbar from './components/Navbar'
+import { ToastProvider } from './components/Toast'
 
 function App() {
   return (
+    <ToastProvider>
     <Router>
       <Navbar />
       <Routes>
@@ -22,6 +24,7 @@ function App() {
         <Route path="/review" element={<Review />} />
       </Routes>
     </Router>
+    </ToastProvider>
   )
 }
 

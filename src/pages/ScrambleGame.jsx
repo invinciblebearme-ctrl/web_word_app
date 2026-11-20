@@ -5,10 +5,12 @@ import { addToMyVoca, removeFromMyVoca, isFavorite } from '../utils/storage'
 import { wordImageUrl } from '../utils/image'
 import { recordAnswer } from '../utils/progress'
 import { speak } from '../utils/speech'
+import { useToast } from '../components/Toast'
 
 function ScrambleGame() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const toast = useToast()
   const [index, setIndex] = useState(0)
   const [userInput, setUserInput] = useState('')
   const [scrambled, setScrambled] = useState([])
@@ -88,7 +90,7 @@ function ScrambleGame() {
     if (index < roundData.words.length - 1) {
       setIndex(index + 1)
     } else {
-      alert("모든 단어를 마쳤습니다! 참 잘하셨어요!")
+      toast("모든 단어를 마쳤어요! 참 잘했어요!", { type: 'success' })
       navigate('/scramble')
     }
   }
@@ -114,6 +116,8 @@ function ScrambleGame() {
             className={`favorite-btn ${fav ? 'active' : ''}`} 
             onClick={toggleFavorite}
             title="나만의 단어장에 저장"
+            aria-label={fav ? '나만의 단어장에서 빼기' : '나만의 단어장에 저장'}
+            aria-pressed={fav}
           >
             {fav ? '⭐' : '☆'}
           </button>
@@ -142,9 +146,9 @@ function ScrambleGame() {
 
           <div className="scrambled-hint">
             {scrambled.map((char, i) => (
-              <span key={i} className="letter-card" onClick={() => handleLetterClick(char)}>
+              <button type="button" key={i} className="letter-card" onClick={() => handleLetterClick(char)} aria-label={`글자 ${char} 넣기`}>
                 {char}
-              </span>
+              </button>
             ))}
           </div>
           <input 
@@ -153,7 +157,12 @@ function ScrambleGame() {
             value={userInput}
             placeholder="단어를 완성하세요..."
             onChange={(e) => setUserInput(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleCheck()}
+            onKeyDown={(e) => e.key === 'Enter' && handleCheck()}
+            aria-label="단어 입력"
+            autoCapitalize="none"
+            autoCorrect="off"
+            autoComplete="off"
+            spellCheck={false}
           />
           <div style={{ display: 'flex', gap: '10px', marginTop: '10px', flexWrap: 'wrap', justifyContent: 'center' }}>
              <button className="dark-button reset-input" onClick={() => setUserInput('')}>지우기</button>
@@ -169,7 +178,7 @@ function ScrambleGame() {
         </div>
 
         {feedback && (
-          <div className={`stt-feedback level-${feedback.level}`}>
+          <div className={`stt-feedback level-${feedback.level}`} role="status">
             {feedback.message}
           </div>
         )}

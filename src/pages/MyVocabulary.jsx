@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getMyVoca, removeFromMyVoca } from '../utils/storage'
 import { wordImageUrl } from '../utils/image'
+import { useToast } from '../components/Toast'
+import { clickable } from '../utils/a11y'
 
 function VocaItem({ word, handleDelete, speakWord }) {
   const [showKo, setShowKo] = useState(false);
@@ -10,7 +12,7 @@ function VocaItem({ word, handleDelete, speakWord }) {
   return (
     <div
       className="challenge-card voca-card"
-      onClick={() => setShowKo(!showKo)}
+      {...clickable(() => setShowKo(!showKo), showKo ? `${word.ko}, 눌러서 영어 보기` : `${word.en}, 눌러서 뜻 보기`)}
     >
       {imgUrl ? (
         <img
@@ -56,6 +58,7 @@ function VocaItem({ word, handleDelete, speakWord }) {
           onClick={() => handleDelete(word.en)}
           style={{ position: 'static', padding: '0 5px', fontSize: '1.2rem', color: '#f87171', border: 'none', background: 'none' }}
           title="삭제"
+          aria-label={`${word.en} 단어장에서 삭제`}
         >
           ✕
         </button>
@@ -68,6 +71,7 @@ function MyVocabulary() {
   const [vocaList, setVocaList] = useState([])
   const [isExporting, setIsExporting] = useState(false)
   const navigate = useNavigate()
+  const toast = useToast()
   const printRef = useRef()
 
   useEffect(() => {
@@ -137,7 +141,7 @@ function MyVocabulary() {
         pdf.save(`나만의_단어장_${new Date().toLocaleDateString()}.pdf`)
       } catch (error) {
         console.error('PDF export failed:', error)
-        alert('PDF 생성 중 오류가 발생했습니다.')
+        toast('PDF를 만드는 중에 문제가 생겼어요. 잠시 뒤 다시 해 보세요.', { type: 'error' })
       } finally {
         setIsExporting(false)
       }

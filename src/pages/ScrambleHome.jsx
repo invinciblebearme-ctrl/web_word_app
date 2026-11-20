@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import allRounds from '../data/all_rounds.json'
 import { wordImageUrl } from '../utils/image'
+import { clickable } from '../utils/a11y'
 
 function ScrambleHome() {
   const [searchTerm, setSearchTerm] = useState('')
@@ -98,12 +99,12 @@ function ScrambleHome() {
             {filteredRounds
               .filter(r => r.category === category)
               .map(round => (
-                <div key={round.id} className="item" onClick={() => navigate(`/scramble-game/${round.id}`)}>
+                <div key={round.id} className="item" {...clickable(() => navigate(`/scramble-game/${round.id}`), round.name)}>
                   <img 
                     src={wordImageUrl(round.words[0].img)} 
                     loading="lazy"
                     decoding="async"
-                    alt={round.name}
+                    alt=""
                     style={{ objectFit: 'contain' }}
                     onError={(e) => {
                       e.target.style.display = 'none';

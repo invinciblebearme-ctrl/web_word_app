@@ -1140,3 +1140,115 @@ img:active {
     padding-left: 14px;
     padding-right: 14px;
 }
+
+/* ===== 4단계: 알림(토스트) ===== */
+.toast-container {
+    position: fixed;
+    left: 50%;
+    bottom: calc(20px + env(safe-area-inset-bottom));
+    transform: translateX(-50%);
+    z-index: 3000;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: min(92vw, 420px);
+    pointer-events: none;
+}
+
+.toast {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 14px;
+    border-radius: 14px;
+    background: rgba(15, 23, 42, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-left: 4px solid #38bdf8;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    color: #f1f5f9;
+    font-size: 0.9rem;
+    line-height: 1.45;
+    text-align: left;
+    pointer-events: auto;
+    animation: toast-in 0.25s ease-out;
+}
+
+.toast-success { border-left-color: #4ade80; }
+.toast-warning { border-left-color: #facc15; }
+.toast-error { border-left-color: #f87171; }
+
+.toast-message { flex: 1; word-break: keep-all; }
+
+.toast-close {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    font-size: 0.9rem;
+    cursor: pointer;
+    padding: 0 2px;
+    margin: 0;
+}
+
+@keyframes toast-in {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== 4단계: 접근성 ===== */
+:focus-visible {
+    outline: 3px solid #facc15;
+    outline-offset: 3px;
+}
+
+.item:focus-visible {
+    border-radius: 12px;
+}
+
+.item:focus-visible img {
+    box-shadow: 0 0 15px rgba(56, 189, 248, 0.6);
+}
+
+button.letter-card {
+    font-family: inherit;
+    line-height: 1.2;
+    margin: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* ===== 4단계: 홈 하단 링크 ===== */
+.home-extras {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin: 40px auto 60px;
+    padding: 0 16px;
+}
+
+.extra-link {
+    padding: 10px 16px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(2, 6, 23, 0.5);
+    color: #cbd5e1;
+    text-decoration: none;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+}
+
+.extra-link:hover {
+    color: #fff;
+    border-color: #38bdf8;
+}
+
+.extra-link small {
+    color: #64748b;
+}
