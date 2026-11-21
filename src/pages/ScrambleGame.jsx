@@ -5,6 +5,7 @@ import { addToMyVoca, removeFromMyVoca, isFavorite } from '../utils/storage'
 import { wordImageUrl } from '../utils/image'
 import { recordAnswer } from '../utils/progress'
 import { speak } from '../utils/speech'
+import EasyMeaning from '../components/EasyMeaning'
 import { useToast } from '../components/Toast'
 
 function ScrambleGame() {
@@ -122,6 +123,7 @@ function ScrambleGame() {
             {fav ? '⭐' : '☆'}
           </button>
           <div className="word-ko">{currentWord.ko}</div>
+          <EasyMeaning en={currentWord.en} />
 
           {/* Match WordChallenge image frame and style exactly */}
           <div className="scramble-image-area-inline" style={{ margin: '0 auto' }}>

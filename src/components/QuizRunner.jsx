@@ -7,6 +7,7 @@ import { wordImageUrl } from '../utils/image'
 import { loadActivity, streakInfo, DAILY_GOAL } from '../utils/activity'
 import { currentBadges } from '../utils/badges'
 import { useToast } from './Toast'
+import EasyMeaning from './EasyMeaning'
 import { getExamplesSync, splitExample, BLANK } from '../utils/examples'
 
 const ALL_WORDS = allRounds.flatMap((r) => r.words)
@@ -229,6 +230,7 @@ function QuizRunner({ words, title, onExit, exitLabel = '목록으로', types })
             <div className="transcript-hint">
               {q.word.en} = {q.word.ko}
             </div>
+            <EasyMeaning en={q.word.en} />
           </div>
         )}
 

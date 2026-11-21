@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import allRounds from '../data/all_rounds.json'
 import { wordImageUrl } from '../utils/image'
+import { meaningIncludes } from '../utils/meaning'
 import { clickable } from '../utils/a11y'
 
 function ScrambleHome() {
@@ -34,7 +35,7 @@ function ScrambleHome() {
         round.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         round.words.some(word => 
           word.en.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          word.ko.includes(searchTerm)
+          meaningIncludes(word, searchTerm)
         )
       )
     }

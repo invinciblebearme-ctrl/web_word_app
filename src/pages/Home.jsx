@@ -4,6 +4,7 @@ import allRounds from '../data/all_rounds.json'
 import { wordImageUrl } from '../utils/image'
 import { clickable } from '../utils/a11y'
 import { loadProgress, roundSummary, getDueWords } from '../utils/progress'
+import { meaningIncludes } from '../utils/meaning'
 import { loadActivity, streakInfo, DAILY_GOAL } from '../utils/activity'
 
 const ALL_WORDS = allRounds.flatMap((r) => r.words)
@@ -41,7 +42,7 @@ function Home() {
         round.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         round.words.some(word => 
           word.en.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          word.ko.includes(searchTerm)
+          meaningIncludes(word, searchTerm)
         )
       )
     }

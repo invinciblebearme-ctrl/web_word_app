@@ -2627,3 +2627,34 @@ button.letter-card {
     font-weight: 800;
     color: #fca5a5;
 }
+
+/* 쉬운 뜻 (원래 뜻 밑에 한 줄) */
+.word-easy {
+    margin-top: 6px;
+    font-size: 0.95rem;
+    color: #a7f3d0;
+}
+
+.word-easy-tag {
+    display: inline-block;
+    margin-right: 6px;
+    padding: 1px 8px;
+    border-radius: 10px;
+    font-size: 0.75em;
+    font-weight: 700;
+    color: #064e3b;
+    background: #6ee7b7;
+    vertical-align: middle;
+}
+
+.cr-easy {
+    font-size: clamp(1rem, 2.6vw, 1.6rem);
+}
+
+.fullscreen .cr-easy {
+    font-size: clamp(1.2rem, 3.5vh, 2.4rem);
+}
+
+.stt-feedback .word-easy {
+    font-size: 0.85rem;
+}

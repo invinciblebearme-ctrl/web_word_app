@@ -5,6 +5,7 @@ import { TOPICS, groupByTopic } from '../utils/topics'
 import { shuffle } from '../utils/quiz'
 import { wordImageUrl } from '../utils/image'
 import { canSpeak, speak } from '../utils/speech'
+import EasyMeaning from '../components/EasyMeaning'
 import { beep, clampSize, CLASS_SIZE_KEY, formatTime, MAX_SIZE, MIN_SIZE, pickNumber, TIMER_PRESETS } from '../utils/classroom'
 
 const ALL_WORDS = allRounds.flatMap((r) => r.words)
@@ -122,6 +123,7 @@ function Flashcards({ preset }) {
           </div>
           <div className="cr-word" lang="en">{showEn ? word.en : '?'}</div>
           <div className={`cr-ko ${reveal ? '' : 'hidden'}`}>{reveal ? word.ko : '눌러서 뜻 보기'}</div>
+          {reveal && <EasyMeaning en={word.en} className="cr-easy" />}
         </div>
         <div className="cr-nav">
           <button className="sub-tab-item" onClick={() => go(-1)} disabled={index === 0} aria-label="이전 카드">◀ 이전</button>

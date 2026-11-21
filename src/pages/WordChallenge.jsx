@@ -9,6 +9,7 @@ import { useToast } from '../components/Toast'
 import { clickable } from '../utils/a11y'
 import { gradePronunciation, letterMatch } from '../utils/pronounce'
 import { useExamples, splitExample } from '../utils/examples'
+import EasyMeaning from '../components/EasyMeaning'
 
 function WordChallenge() {
   const { id } = useParams()
@@ -235,7 +236,10 @@ function WordChallenge() {
           {showingEnglish ? (
             <div className="word-en" lang="en">{currentWord.en}</div>
           ) : (
-            <div className="word-ko">{currentWord.ko}</div>
+            <div>
+              <div className="word-ko">{currentWord.ko}</div>
+              <EasyMeaning en={currentWord.en} />
+            </div>
           )}
         </div>
 
