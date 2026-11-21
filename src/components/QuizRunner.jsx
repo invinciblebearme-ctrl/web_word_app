@@ -28,6 +28,10 @@ function QuizRunner({ words, title, onExit, exitLabel = '목록으로' }) {
   const [badgesBefore, setBadgesBefore] = useState(earnedIds)
 
   const q = questions[index]
+  // 서버에 그림이 없는 단어(현재 27개): 그림 문제를 뜻→단어 문제로 바꿔 보여 준다
+  const [imgFailed, setImgFailed] = useState(false)
+  useEffect(() => setImgFailed(false), [q])
+  const shownType = q?.type === 'img2en' && imgFailed ? 'ko2en' : q?.type
   const answered = selected !== null
   const isCorrect = answered && (q.type === 'spell'
     ? normalizeAnswer(selected) === normalizeAnswer(q.word.en)
@@ -138,13 +142,13 @@ function QuizRunner({ words, title, onExit, exitLabel = '목록으로' }) {
         <h1>{title}</h1>
         <div className="challenge-index">문제 {index + 1} / {questions.length}</div>
         <div className="quiz-progress"><div style={{ width: `${(index / questions.length) * 100}%` }} /></div>
-        <div className="quiz-instruction">{TYPE_LABELS[q.type]}</div>
+        <div className="quiz-instruction">{TYPE_LABELS[shownType]}</div>
 
         <div className="challenge-card quiz-card">
-          {q.type === 'ko2en' && <div className="word-ko">{q.word.ko}</div>}
-          {q.type === 'img2en' && (
+          {shownType === 'ko2en' && <div className="word-ko">{q.word.ko}</div>}
+          {shownType === 'img2en' && (
             <div className="challenge-image quiz-image">
-              <img src={imgUrl} alt="문제 그림" className="word-image" />
+              <img src={imgUrl} alt="문제 그림" className="word-image" onError={() => setImgFailed(true)} />
             </div>
           )}
           {(q.type === 'audio2ko' || q.type === 'spell') && (

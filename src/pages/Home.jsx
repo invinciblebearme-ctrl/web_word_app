@@ -110,6 +110,7 @@ function Home() {
             ))}
           </div>
         </div>
+        <button className="topic-entry" onClick={() => navigate('/topics')}>🗂 주제별로 공부하기 <small>동물 · 음식 · 학교 …</small></button>
       </div>
 
       {categories.map((category) => (
