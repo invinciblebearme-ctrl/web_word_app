@@ -1,0 +1,59 @@
+name: Deploy
+
+# main에 머지되면 빌드해서 배포 저장소(TodayVoca800)에 커밋한다.
+# Cloudflare Worker today-voca-800(Workers Builds)이 TodayVoca800 push마다 wrangler.jsonc로 배포한다 (voca.allforedu.kr).
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    # 수동 실행도 main에서만 (다른 브랜치 코드가 배포되지 않게)
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+
+      - name: 배포 저장소 가져오기
+        uses: actions/checkout@v4
+        with:
+          repository: invinciblebearme-ctrl/TodayVoca800
+          ref: main
+          path: site
+          ssh-key: ${{ secrets.SITE_DEPLOY_KEY }}
+
+      - run: scripts/sync-site.sh site
+
+      - name: 바뀐 것이 있으면 커밋하고 올리기
+        working-directory: site
+        run: |
+          # 오래된 실행을 다시 돌려 최신 배포를 되돌리지 않도록, 지금의 main 최신 커밋일 때만 올린다
+          LATEST=$(git ls-remote "${{ github.server_url }}/${{ github.repository }}" refs/heads/main | cut -f1)
+          if [ "$LATEST" != "$GITHUB_SHA" ]; then
+            echo "main 최신 커밋($LATEST)이 아니라서 건너뜀"
+            exit 0
+          fi
+          git add -A
+          if git diff --cached --quiet; then
+            echo "바뀐 파일 없음"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -q -m "deploy: web_word_app@${GITHUB_SHA::7}" -m "${{ github.server_url }}/${{ github.repository }}/commit/${GITHUB_SHA}"
+          git push origin HEAD:main
