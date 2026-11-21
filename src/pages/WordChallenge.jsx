@@ -5,10 +5,14 @@ import { addToMyVoca, removeFromMyVoca, isFavorite } from '../utils/storage'
 import { wordImageUrl } from '../utils/image'
 import { markSeen } from '../utils/progress'
 import { speak, getSpeechRecognition } from '../utils/speech'
+import { useToast } from '../components/Toast'
+import { clickable } from '../utils/a11y'
 
 function WordChallenge() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const toast = useToast()
+  const browserWarned = useRef(false)
   const [roundData, setRoundData] = useState(null)
   const [index, setIndex] = useState(0)
   const [showingEnglish, setShowingEnglish] = useState(true)
@@ -106,13 +110,14 @@ function WordChallenge() {
     
     const isSupported = isChrome || isEdge || isWhale;
     
-    if (!isSupported) {
-      alert("⚠️ 현재 브라우저에서는 음성 인식이 지원되지 않을 수 있습니다.\nChrome, Edge, 또는 Whale 브라우저로 접속하시면 가장 정확하게 작동합니다.");
+    if (!isSupported && !browserWarned.current) {
+      browserWarned.current = true;
+      toast("이 브라우저에서는 음성 인식이 정확하지 않을 수 있어요. 크롬·엣지·웨일을 추천해요.", { type: 'warning' });
     }
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      alert("이 브라우저는 음성 인식을 지원하지 않습니다. Chrome 브라우저를 설치해 주세요!");
+      toast("이 브라우저는 음성 인식을 지원하지 않아요. 크롬 브라우저에서 해 보세요!", { type: 'error' });
       return;
     }
 
@@ -135,16 +140,15 @@ function WordChallenge() {
       const isHttps = window.location.protocol === 'https:';
 
       if (event.error === 'not-allowed') {
-        alert("🎤 마이크 사용 권한이 거부되었습니다. 주소창 왼쪽의 마이크 아이콘을 클릭하여 권한을 '허용'해 주세요!");
+        toast("🎤 마이크 권한이 꺼져 있어요. 주소창 왼쪽의 아이콘을 눌러 마이크를 '허용'해 주세요.", { type: 'error', duration: 7000 });
       } else if (event.error === 'service-not-allowed' || !isHttps) {
-        alert("🔒 보안 연결(HTTPS)이 필요합니다.\n주소창의 주소가 'https://'로 시작하는지 확인해 주세요. (Dothome 등의 서버 설정 확인이 필요할 수 있습니다.)");
+        toast("🔒 음성 인식은 보안 연결(https://)에서만 돼요. 주소가 https://로 시작하는지 확인해 주세요.", { type: 'error', duration: 7000 });
       } else if (event.error === 'network') {
-        alert("🌐 네트워크 연결이 불안정합니다.\n1. 인터넷 연결을 확인해 주세요.\n2. Chrome 브라우저 사용을 권장합니다.\n3. 잠시 후 다시 시도해 주세요.");
+        toast("🌐 인터넷 연결이 불안정해요. 연결을 확인하고 잠시 뒤 다시 해 보세요.", { type: 'error', duration: 6000 });
       } else if (event.error === 'no-speech') {
-        // 말소리가 들리지 않았을 때는 alert 대신 상태만 해제 (사용자 경험 개선)
-        console.log("No speech detected.");
+        toast("목소리가 들리지 않았어요. 마이크 가까이에서 다시 말해 보세요.", { type: 'info' });
       } else {
-        alert("발음 인식에 실패했습니다. (오류: " + event.error + ")\n잠시 후 다시 시도해 주세요.");
+        toast(`발음을 알아듣지 못했어요. 잠시 뒤 다시 해 보세요. (${event.error})`, { type: 'error' });
       }
     };
 
@@ -161,7 +165,7 @@ function WordChallenge() {
         
         <div 
           className="challenge-card" 
-          onClick={toggleShowingEnglish}
+          {...clickable(toggleShowingEnglish, showingEnglish ? '눌러서 우리말 뜻 보기' : '눌러서 영어 단어 보기')}
           style={{ cursor: 'pointer' }}
         >
           <button 
@@ -171,11 +175,13 @@ function WordChallenge() {
               toggleFavorite();
             }}
             title="나만의 단어장에 저장"
+            aria-label={fav ? '나만의 단어장에서 빼기' : '나만의 단어장에 저장'}
+            aria-pressed={fav}
           >
             {fav ? '⭐' : '☆'}
           </button>
           {showingEnglish ? (
-            <div className="word-en">{currentWord.en}</div>
+            <div className="word-en" lang="en">{currentWord.en}</div>
           ) : (
             <div className="word-ko">{currentWord.ko}</div>
           )}
@@ -195,7 +201,7 @@ function WordChallenge() {
         </div>
 
         {pronunciationScore && (
-          <div className={`stt-feedback level-${pronunciationScore.level}`}>
+          <div className={`stt-feedback level-${pronunciationScore.level}`} role="status">
             {pronunciationScore.level === 3 && "Excellent! ⭐⭐⭐"}
             {pronunciationScore.level === 2 && "Good Job! ⭐⭐"}
             {pronunciationScore.level === 1 && "Try Again! ⭐"}
