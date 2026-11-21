@@ -7,6 +7,7 @@ import { markSeen } from '../utils/progress'
 import { speak, getSpeechRecognition } from '../utils/speech'
 import { useToast } from '../components/Toast'
 import { clickable } from '../utils/a11y'
+import { gradePronunciation, letterMatch } from '../utils/pronounce'
 
 function WordChallenge() {
   const { id } = useParams()
@@ -20,6 +21,7 @@ function WordChallenge() {
     const round = allRounds.find(r => r.id === parseInt(id))
     if (round) {
       setRoundData(round)
+      setIndex(0) // 다른 회차로 바로 이동해도 첫 단어부터
     } else {
       navigate('/')
     }
@@ -85,19 +87,19 @@ function WordChallenge() {
 
   if (!roundData) return <div className="challenge-body">데이터를 불러오는 중...</div>;
 
-  // 음성 인식 결과 또는 직접 입력한 답을 채점
-  // 음성 인식은 인식 오차가 있어 부분 일치도 Good으로, 직접 입력은 철자가 정확해야 정답
-  const gradeAnswer = (raw, { strict = false } = {}) => {
+  // 직접 입력한 답: 철자가 정확해야 정답
+  const gradeTyped = (raw) => {
     const transcript = raw.toLowerCase().trim();
     if (!transcript) return;
-    const target = currentWord.en.toLowerCase().trim();
-    let level = 1; // Try Again
-    if (transcript === target) {
-      level = 3; // Excellent
-    } else if (!strict && (transcript.includes(target) || target.includes(transcript))) {
-      level = 2; // Good
-    }
-    setPronunciationScore({ transcript, level });
+    const level = transcript === currentWord.en.toLowerCase().trim() ? 3 : 1;
+    setPronunciationScore({ transcript, level, mode: 'typed' });
+  };
+
+  // 음성 인식 결과(후보 여러 개): 가장 가까운 후보로 채점하고 비슷한 정도와 틀린 글자를 보여 준다
+  const gradeSpoken = (alternatives) => {
+    const r = gradePronunciation(alternatives, currentWord.en);
+    if (!r) return;
+    setPronunciationScore({ transcript: r.heard, level: r.level, score: r.score, how: r.how, mode: 'speech' });
   };
 
   // STT 발음 측정 시작
@@ -124,13 +126,13 @@ function WordChallenge() {
     const recognition = new SpeechRecognition();
     recognition.lang = 'en-US';
     recognition.interimResults = false;
-    recognition.maxAlternatives = 1;
+    recognition.maxAlternatives = 5;
 
     recognition.onstart = () => setIsListening(true);
     recognition.onend = () => setIsListening(false);
 
     recognition.onresult = (event) => {
-      gradeAnswer(event.results[0][0].transcript);
+      gradeSpoken(Array.from(event.results[0], (alt) => alt.transcript));
     };
 
     recognition.onerror = (event) => {
@@ -205,8 +207,49 @@ function WordChallenge() {
             {pronunciationScore.level === 3 && "Excellent! ⭐⭐⭐"}
             {pronunciationScore.level === 2 && "Good Job! ⭐⭐"}
             {pronunciationScore.level === 1 && "Try Again! ⭐"}
-            <div className="transcript-hint">{sttSupported ? '인식된 발음' : '입력한 단어'}: "{pronunciationScore.transcript}"</div>
-            {pronunciationScore.level < 3 && <div className="transcript-hint">정답: "{currentWord.en}"</div>}
+            {pronunciationScore.mode === 'speech' ? (
+              <div className="pron-detail">
+                <div className="pron-row">
+                  <span className="pron-label">목표</span>
+                  <span className="pron-target" lang="en" aria-label={currentWord.en}>
+                    {(pronunciationScore.level === 3
+                      ? [...currentWord.en].map((ch) => ({ ch, ok: true }))
+                      : letterMatch(pronunciationScore.transcript, currentWord.en)
+                    ).map((x, i) => (
+                      <span key={i} className={x.ok ? '' : 'pron-miss'}>{x.ch}</span>
+                    ))}
+                  </span>
+                </div>
+                <div className="pron-row">
+                  <span className="pron-label">들린 말</span>
+                  <span className="pron-heard" lang="en">{pronunciationScore.transcript}</span>
+                </div>
+                {pronunciationScore.level < 3 && (
+                  <div className="pron-score" aria-label={`비슷한 정도 ${pronunciationScore.score}%`}>
+                    <div className="pron-score-bar"><div style={{ width: `${pronunciationScore.score}%` }} /></div>
+                    <span>{pronunciationScore.score}%</span>
+                  </div>
+                )}
+                <div className="pron-tip">
+                  {pronunciationScore.how === 'homophone' && '소리가 같은 다른 단어로 알아들었어요. 발음은 맞아요!'}
+                  {pronunciationScore.how === 'inPhrase' && '단어 앞뒤로 다른 말이 함께 들렸지만 단어는 정확해요.'}
+                  {pronunciationScore.level === 2 && '거의 다 왔어요! 빨간 글자 부분을 천천히 들어 보고 다시 해 봐요.'}
+                  {pronunciationScore.level === 1 && '천천히 듣고 따라 한 다음 다시 말해 봐요.'}
+                </div>
+                {pronunciationScore.level < 3 && (
+                  <div className="pron-actions">
+                    <button type="button" onClick={() => speak(currentWord.en)}>🔊 정답 듣기</button>
+                    <button type="button" onClick={() => speak(currentWord.en, { rate: 0.55 })}>🐢 천천히</button>
+                    <button type="button" onClick={startSTT} disabled={isListening}>🎤 다시 하기</button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <>
+                <div className="transcript-hint">입력한 단어: "{pronunciationScore.transcript}"</div>
+                {pronunciationScore.level < 3 && <div className="transcript-hint">정답: "{currentWord.en}"</div>}
+              </>
+            )}
           </div>
         )}
 
@@ -235,7 +278,7 @@ function WordChallenge() {
         ) : (
           <form
             className="stt-controls"
-            onSubmit={(e) => { e.preventDefault(); gradeAnswer(typedAnswer, { strict: true }) }}
+            onSubmit={(e) => { e.preventDefault(); gradeTyped(typedAnswer) }}
           >
             <input
               className="scramble-input"

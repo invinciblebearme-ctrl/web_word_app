@@ -6,7 +6,7 @@ function Navbar() {
   const [searchParams] = useSearchParams()
 
   // Reading mode is active for Home AND WordChallenge pages
-  const isReadingActive = location.pathname === '/' || location.pathname.startsWith('/challenge') || location.pathname.startsWith('/quiz')
+  const isReadingActive = location.pathname === '/' || location.pathname.startsWith('/challenge') || location.pathname.startsWith('/quiz') || location.pathname.startsWith('/topics')
   // Writing mode is active for Scramble pages
   const isWritingActive = location.pathname.startsWith('/scramble')
   // My Vocabulary mode is active
