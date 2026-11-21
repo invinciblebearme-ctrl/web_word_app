@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getMyVoca, removeFromMyVoca } from '../utils/storage'
-import jsPDF from 'jspdf'
-import html2canvas from 'html2canvas'
 import { wordImageUrl } from '../utils/image'
 
 function VocaItem({ word, handleDelete, speakWord }) {
@@ -18,6 +16,8 @@ function VocaItem({ word, handleDelete, speakWord }) {
         <img
           src={imgUrl}
           alt={word.en}
+          loading="lazy"
+          decoding="async"
           crossOrigin="anonymous"
           style={{ width: '30px', height: '30px', borderRadius: '10%', objectFit: 'cover', marginRight: '10px' }}
         />
@@ -96,6 +96,11 @@ function MyVocabulary() {
 
     setTimeout(async () => {
       try {
+        // PDF 라이브러리(약 500KB)는 내보내기 버튼을 눌렀을 때만 불러온다
+        const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
+          import('html2canvas'),
+          import('jspdf'),
+        ])
         const element = printRef.current
         const canvas = await html2canvas(element, {
           scale: 2,

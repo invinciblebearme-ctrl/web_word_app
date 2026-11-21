@@ -103,6 +103,8 @@ function Home() {
                 <div key={round.id} className="item" onClick={() => navigate(`/challenge/${round.id}`)}>
                   <img 
                     src={wordImageUrl(round.words[0].img)} 
+                    loading="lazy"
+                    decoding="async"
                     alt={round.name}
                     style={{ objectFit: 'contain' }}
                     onError={(e) => {
