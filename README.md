@@ -57,12 +57,12 @@ public/
 ## 배포
 
 - `CI` 워크플로가 push와 PR마다 빌드를 검증하고 `dist`를 아티팩트로 올립니다.
-- 사이트(voca.allforedu.kr)는 **Cloudflare Pages**가 이 저장소를 직접 빌드해 배포합니다.
-  - 빌드 명령 `npm run build`, 출력 폴더 `dist`, 운영 브랜치 `main`
-  - Node 버전은 `.nvmrc`(22)를 따릅니다. 대시보드 환경 변수 `NODE_VERSION=22`를 함께 넣어도 됩니다.
-  - `main`에 머지하면 운영 사이트에 배포되고, 다른 브랜치와 PR은 미리보기 주소에 배포됩니다.
+- 사이트(voca.allforedu.kr)는 **Cloudflare Pages**가 배포 전용 저장소 **TodayVoca800**을 보고 배포합니다.
+  - `main`에 머지하면 `Deploy` 워크플로가 테스트·빌드한 뒤 `scripts/sync-site.sh`로 `dist` 내용과 `functions/`, `src/data/all_rounds.json`을 TodayVoca800에 커밋합니다. 그러면 Cloudflare가 자동으로 다시 배포합니다.
+  - TodayVoca800은 직접 고치지 마세요. 다음 배포 때 덮어써집니다.
+  - 필요한 설정(한 번만): TodayVoca800에 **쓰기 권한이 있는 Deploy key**를 등록하고, 그 개인 키를 이 저장소 Secrets의 `SITE_DEPLOY_KEY`로 넣습니다.
+  - 수동 실행은 Actions → Deploy → Run workflow (main만). main 최신 커밋이 아닌 실행은 건너뜁니다.
   - 주소가 `#/...` 형식(HashRouter)이라 `_redirects` 같은 별도 설정은 필요 없습니다.
-- 예전에는 빌드 결과물을 TodayVoca800 저장소에 직접 올려 배포했습니다. 도메인을 이 저장소의 Pages 프로젝트로 옮긴 뒤에는 TodayVoca800을 고치지 않습니다.
 
 ### 학급 진도 서버 설정 (D1)
 
@@ -70,7 +70,7 @@ public/
 
 1. Cloudflare 대시보드 → **Storage & Databases → D1** → 데이터베이스 만들기 (예: `voca-class`)
 2. 만든 데이터베이스의 **Console**에서 `migrations/0001_class.sql` 내용을 붙여 넣고 실행
-3. Pages 프로젝트 → **Settings → Bindings → D1 database** 추가: 변수 이름 `DB`, 데이터베이스 `voca-class` (운영·미리보기 모두)
+3. Pages 프로젝트(TodayVoca800과 연결된 프로젝트) → **Settings → Bindings → D1 database** 추가: 변수 이름 `DB`, 데이터베이스 `voca-class` (운영·미리보기 모두)
 4. 다시 배포하면 `/api/classes`가 동작합니다
 
 로컬 확인: `npx wrangler pages dev dist --d1 DB=local-class` (스키마는 `wrangler d1 execute ... --local --file migrations/0001_class.sql`로 적용)
