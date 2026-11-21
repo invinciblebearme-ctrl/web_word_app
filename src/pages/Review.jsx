@@ -6,6 +6,7 @@ import { getWrongWords, loadProgress, levelOf, LEVELS } from '../utils/progress'
 import { loadActivity, streakInfo, calendarWeeks, DAILY_GOAL } from '../utils/activity'
 import { buildDailySession } from '../utils/daily'
 import { badgeMetrics, evaluateBadges } from '../utils/badges'
+import { loadSentences } from '../utils/sentences'
 import { speak } from '../utils/speech'
 
 const ALL_WORDS = allRounds.flatMap((r) => r.words)
@@ -33,7 +34,7 @@ function Review() {
       session: buildDailySession(allRounds, progress, now),
       wrong: getWrongWords(ALL_WORDS, progress),
       weeks: calendarWeeks(activity, now),
-      badges: evaluateBadges(badgeMetrics(allRounds, progress, streak)),
+      badges: evaluateBadges(badgeMetrics(allRounds, progress, streak, loadSentences().length)),
     }
   }, [quiz])
 

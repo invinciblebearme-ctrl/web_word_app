@@ -7,15 +7,33 @@ import { wordImageUrl } from '../utils/image'
 import { loadActivity, streakInfo, DAILY_GOAL } from '../utils/activity'
 import { currentBadges } from '../utils/badges'
 import { useToast } from './Toast'
+import { getExamplesSync, splitExample, BLANK } from '../utils/examples'
 
 const ALL_WORDS = allRounds.flatMap((r) => r.words)
 
+// 예문 속 단어를 굵게 보여 준다
+function Sentence({ text, en }) {
+  const parts = splitExample(text, en)
+  if (!parts) return <span lang="en">{text}</span>
+  return <span lang="en">{parts[0]}<b className="ex-word">{parts[1]}</b>{parts[2]}</span>
+}
+
+// 빈칸 문장: 빈칸을 눈에 띄게
+function ClozeText({ text }) {
+  const [a, b] = text.split(BLANK)
+  return <span lang="en">{a}<span className="cloze-blank" aria-label="빈칸">{'\u00a0'.repeat(6)}</span>{b}</span>
+}
+
 // words: 문제로 낼 단어 목록. onExit: 끝내기 버튼 동작. exitLabel: 버튼 이름
-function QuizRunner({ words, title, onExit, exitLabel = '목록으로' }) {
+// types: 낼 문제 유형을 정할 때 (예: 소리 패턴은 듣고 쓰기 위주)
+function QuizRunner({ words, title, onExit, exitLabel = '목록으로', types }) {
   const [quizWords, setQuizWords] = useState(words)
+  // 예문은 앱이 켜질 때 미리 불러 둔다. 아직이면 빈칸 문제 없이 낸다
   const questions = useMemo(
-    () => buildQuiz(quizWords, ALL_WORDS, { hasAudio: canSpeak() }),
-    [quizWords]
+    () => buildQuiz(quizWords, ALL_WORDS, { hasAudio: canSpeak(), examples: getExamplesSync(), types }),
+    // types는 배열이라 렌더마다 새로 만들어질 수 있어 내용으로 비교한다
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [quizWords, types?.join()]
   )
   const [index, setIndex] = useState(0)
   const [selected, setSelected] = useState(null) // 고른 보기 또는 입력한 철자
@@ -58,7 +76,8 @@ function QuizRunner({ words, title, onExit, exitLabel = '목록으로' }) {
     }
     setSelected(value)
     setResults((prev) => [...prev, { word: q.word, correct, level: levelOf(rec) }])
-    if (correct && q.type !== 'audio2ko') speak(q.word.en)
+    if (q.type === 'cloze') speak(q.sentence, { rate: 0.8 })
+    else if (correct && q.type !== 'audio2ko') speak(q.word.en)
   }
 
   const next = () => {
@@ -146,6 +165,13 @@ function QuizRunner({ words, title, onExit, exitLabel = '목록으로' }) {
 
         <div className="challenge-card quiz-card">
           {shownType === 'ko2en' && <div className="word-ko">{q.word.ko}</div>}
+          {q.type === 'cloze' && (
+            <div className="cloze-card">
+              <div className="cloze-sentence">{answered ? <Sentence text={q.sentence} en={q.word.en} /> : <ClozeText text={q.cloze} />}</div>
+              <div className="cloze-ko">{q.sentenceKo}</div>
+              {answered && <button className="quiz-audio-btn" onClick={() => speak(q.sentence, { rate: 0.8 })}>🔊 문장 듣기</button>}
+            </div>
+          )}
           {shownType === 'img2en' && (
             <div className="challenge-image quiz-image">
               <img src={imgUrl} alt="문제 그림" className="word-image" onError={() => setImgFailed(true)} />

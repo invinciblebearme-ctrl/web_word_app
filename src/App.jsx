@@ -9,6 +9,8 @@ import RoundQuiz from './pages/RoundQuiz'
 import Review from './pages/Review'
 // 주제별 페이지는 주제 데이터가 커서 열 때 불러온다
 const Topics = lazy(() => import('./pages/Topics'))
+const Phonics = lazy(() => import('./pages/Phonics'))
+const Sentences = lazy(() => import('./pages/Sentences'))
 import Navbar from './components/Navbar'
 import { ToastProvider } from './components/Toast'
 
@@ -27,6 +29,9 @@ function App() {
         <Route path="/review" element={<Review />} />
         <Route path="/topics" element={<Suspense fallback={null}><Topics /></Suspense>} />
         <Route path="/topics/:key" element={<Suspense fallback={null}><Topics /></Suspense>} />
+        <Route path="/phonics" element={<Suspense fallback={null}><Phonics /></Suspense>} />
+        <Route path="/phonics/:key" element={<Suspense fallback={null}><Phonics /></Suspense>} />
+        <Route path="/sentences" element={<Suspense fallback={null}><Sentences /></Suspense>} />
       </Routes>
     </Router>
     </ToastProvider>

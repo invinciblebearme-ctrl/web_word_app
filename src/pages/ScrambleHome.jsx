@@ -90,6 +90,9 @@ function ScrambleHome() {
             ))}
           </div>
         </div>
+        <div className="entry-row">
+          <button className="topic-entry" onClick={() => navigate('/sentences')}>✏️ 나만의 문장 만들기 <small>배운 단어로 직접 써 보기</small></button>
+        </div>
       </div>
 
       {categories.map((category) => (

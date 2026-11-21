@@ -2,6 +2,7 @@
 // 경쟁보다 자기 기록 중심. 다음 배지까지 남은 양을 보여 준다.
 import { levelOf, loadProgress } from './progress'
 import { loadActivity, streakInfo } from './activity'
+import { loadSentences } from './sentences'
 
 const tiers = (id, emoji, name, unit, values, desc) =>
   values.map((goal) => ({ id: `${id}-${goal}`, emoji, name: name(goal), goal, unit, metric: id, desc: desc(goal) }))
@@ -12,9 +13,10 @@ export const BADGES = [
   ...tiers('days', '📅', (g) => `${g}일 공부`, '일', [10, 50], (g) => `공부한 날 ${g}일 채우기`),
   ...tiers('mastered', '🟢', (g) => `완전히 앎 ${g}`, '단어', [10, 100, 400, 800], (g) => `'완전히 앎' 단어 ${g}개`),
   ...tiers('rounds', '🏆', (g) => `${g}회차 정복`, '회차', [1, 10, 40, 80], (g) => `회차 단어를 모두 '거의 앎' 이상으로 만들기 ${g}회차`),
+  ...tiers('sentences', '✏️', (g) => `문장 ${g}개`, '문장', [1, 10, 30], (g) => `배운 단어로 나만의 문장 ${g}개 쓰기`),
 ]
 
-export const badgeMetrics = (rounds, progress, streak) => {
+export const badgeMetrics = (rounds, progress, streak, sentences = 0) => {
   let mastered = 0
   let roundsDone = 0
   for (const r of rounds) {
@@ -28,6 +30,7 @@ export const badgeMetrics = (rounds, progress, streak) => {
     days: streak.totalDays,
     mastered,
     rounds: roundsDone,
+    sentences,
   }
 }
 
@@ -36,4 +39,4 @@ export const evaluateBadges = (metrics) =>
 
 // 지금 저장된 기록 기준 배지 상태
 export const currentBadges = (rounds, now = Date.now()) =>
-  evaluateBadges(badgeMetrics(rounds, loadProgress(), streakInfo(loadActivity(), now)))
+  evaluateBadges(badgeMetrics(rounds, loadProgress(), streakInfo(loadActivity(), now), loadSentences().length))

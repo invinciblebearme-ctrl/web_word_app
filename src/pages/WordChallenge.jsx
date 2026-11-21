@@ -8,12 +8,15 @@ import { speak, getSpeechRecognition } from '../utils/speech'
 import { useToast } from '../components/Toast'
 import { clickable } from '../utils/a11y'
 import { gradePronunciation, letterMatch } from '../utils/pronounce'
+import { useExamples, splitExample } from '../utils/examples'
 
 function WordChallenge() {
   const { id } = useParams()
   const navigate = useNavigate()
   const toast = useToast()
   const browserWarned = useRef(false)
+  const recognitionRef = useRef(null) // 진행 중인 음성 인식 (가비지 컬렉션으로 결과가 사라지지 않게 붙잡아 둔다)
+  const watchdogRef = useRef(null)
   const [roundData, setRoundData] = useState(null)
   const [index, setIndex] = useState(0)
   const [showingEnglish, setShowingEnglish] = useState(true)
@@ -58,6 +61,8 @@ function WordChallenge() {
   const [fav, setFav] = useState(false)
   const [typedAnswer, setTypedAnswer] = useState('')
   const sttSupported = !!getSpeechRecognition()
+  const examples = useExamples()
+  const [showExKo, setShowExKo] = useState(false)
   
   // 단어가 바뀔 때마다 이미지 에러 및 발음 점수 초기화
   useEffect(() => {
@@ -65,11 +70,25 @@ function WordChallenge() {
     setPronunciationScore(null)
     setShowingEnglish(true) // 단어 변경 시 영어부터 표시
     setTypedAnswer('')
+    setShowExKo(false)
     if (currentWord) {
       setFav(isFavorite(currentWord.en))
       markSeen(currentWord.en)
     }
   }, [index, id, currentWord])
+
+  // 단어가 바뀌거나 화면을 떠나면 듣던 것을 멈춘다
+  const stopListening = () => {
+    clearTimeout(watchdogRef.current)
+    const r = recognitionRef.current
+    recognitionRef.current = null
+    if (r) {
+      r.onresult = r.onerror = r.onend = null
+      try { r.abort() } catch { /* 이미 끝남 */ }
+    }
+    setIsListening(false)
+  }
+  useEffect(() => stopListening, [index, id])
 
   const toggleShowingEnglish = () => {
     setShowingEnglish(prev => !prev)
@@ -123,28 +142,52 @@ function WordChallenge() {
       return;
     }
 
+    stopListening();
     const recognition = new SpeechRecognition();
+    recognitionRef.current = recognition;
     recognition.lang = 'en-US';
     recognition.interimResults = false;
-    recognition.maxAlternatives = 5;
+    recognition.continuous = false;
+    recognition.maxAlternatives = 5; // 크롬·웨일은 후보 여러 개, 엣지는 1개만 줄 수 있다
 
-    recognition.onstart = () => setIsListening(true);
-    recognition.onend = () => setIsListening(false);
+    // 아무 결과도 오지 않고 멈춰 있는 경우(마이크·네트워크 문제)를 대비한 안전장치
+    const giveUp = () => {
+      if (recognitionRef.current !== recognition) return;
+      stopListening();
+      toast("소리를 알아듣지 못했어요. 마이크 가까이에서 또박또박 다시 말해 보세요.", { type: 'info' });
+    };
+
+    recognition.onstart = () => {
+      setIsListening(true);
+      clearTimeout(watchdogRef.current);
+      watchdogRef.current = setTimeout(giveUp, 10000);
+    };
+    recognition.onend = () => {
+      if (recognitionRef.current !== recognition) return;
+      clearTimeout(watchdogRef.current);
+      recognitionRef.current = null;
+      setIsListening(false);
+    };
 
     recognition.onresult = (event) => {
-      gradeSpoken(Array.from(event.results[0], (alt) => alt.transcript));
+      const result = event.results[event.resultIndex ?? 0] || event.results[0];
+      const alternatives = [];
+      for (let i = 0; i < result.length; i++) alternatives.push(result[i].transcript);
+      gradeSpoken(alternatives);
     };
 
     recognition.onerror = (event) => {
+      if (recognitionRef.current !== recognition) return;
       console.error("Speech Recognition Error:", event.error);
-      setIsListening(false);
-      
-      const isHttps = window.location.protocol === 'https:';
+      stopListening();
+      if (event.error === 'aborted') return;
 
       if (event.error === 'not-allowed') {
         toast("🎤 마이크 권한이 꺼져 있어요. 주소창 왼쪽의 아이콘을 눌러 마이크를 '허용'해 주세요.", { type: 'error', duration: 7000 });
-      } else if (event.error === 'service-not-allowed' || !isHttps) {
+      } else if (event.error === 'service-not-allowed' || !window.isSecureContext) {
         toast("🔒 음성 인식은 보안 연결(https://)에서만 돼요. 주소가 https://로 시작하는지 확인해 주세요.", { type: 'error', duration: 7000 });
+      } else if (event.error === 'audio-capture') {
+        toast("🎤 마이크를 찾지 못했어요. 마이크가 연결돼 있는지 확인해 주세요.", { type: 'error', duration: 6000 });
       } else if (event.error === 'network') {
         toast("🌐 인터넷 연결이 불안정해요. 연결을 확인하고 잠시 뒤 다시 해 보세요.", { type: 'error', duration: 6000 });
       } else if (event.error === 'no-speech') {
@@ -154,7 +197,14 @@ function WordChallenge() {
       }
     };
 
-    recognition.start();
+    try {
+      recognition.start();
+    } catch (e) {
+      // 이전 인식이 아직 정리되지 않았을 때 등
+      console.error("Speech Recognition start failed:", e);
+      stopListening();
+      toast("잠시 뒤 다시 눌러 보세요.", { type: 'info' });
+    }
   };
 
   return (
@@ -201,6 +251,24 @@ function WordChallenge() {
             <div className="no-image">{imgUrl ? "이미지 준비중" : "이미지 없음"}</div>
           )}
         </div>
+
+        {(() => {
+          const ex = examples?.[currentWord.en]
+          const parts = ex && splitExample(ex.s, currentWord.en)
+          if (!parts) return null
+          return (
+            <div className="example-box">
+              <div className="example-head">
+                <span className="example-label">예문</span>
+                <button type="button" className="example-speak" onClick={() => speak(ex.s, { rate: 0.8 })} aria-label="예문 듣기">🔊</button>
+              </div>
+              <p className="example-en" lang="en">{parts[0]}<b className="ex-word">{parts[1]}</b>{parts[2]}</p>
+              {showExKo
+                ? <p className="example-ko">{ex.ko}</p>
+                : <button type="button" className="example-ko-btn" onClick={() => setShowExKo(true)}>뜻 보기</button>}
+            </div>
+          )
+        })()}
 
         {pronunciationScore && (
           <div className={`stt-feedback level-${pronunciationScore.level}`} role="status">
