@@ -168,7 +168,7 @@ function Home() {
       ))}
 
       <footer className="home-extras">
-        <a href="./WordGame/" className="extra-link">🎮 단어 팡팡 게임 <small>(웹캠 손동작)</small></a>
+        <a href="./WordGame/" className="extra-link">🎮 단어 팡팡 게임 <small>(회차 선택 · 웹캠 손동작)</small></a>
         <a href="./quizn/" className="extra-link">🔗 퀴즈앤 링크 모음</a>
       </footer>
     </div>
