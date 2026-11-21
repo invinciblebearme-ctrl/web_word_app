@@ -43,7 +43,7 @@ function Navbar() {
             className={`segment-item ${isReviewActive ? 'active' : ''}`}
             aria-current={isReviewActive ? 'page' : undefined}
           >
-            <span className="nav-icon" aria-hidden="true">🔁</span> 복습
+            <span className="nav-icon" aria-hidden="true">📅</span> 학습
           </Link>
         </div>
       </div>

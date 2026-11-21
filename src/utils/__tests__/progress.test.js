@@ -22,9 +22,20 @@ describe('nextRecord', () => {
   it('맞히면 상자가 하나씩 올라가고 다음 복습일은 자정 기준', () => {
     let r = nextRecord(undefined, true, NOW)
     expect(r).toMatchObject({ box: 1, correct: 1, wrong: 0, due: MIDNIGHT + INTERVAL_DAYS[1] * DAY })
-    r = nextRecord(r, true, NOW)
+    r = nextRecord(r, true, NOW + DAY)
     expect(r.box).toBe(2)
-    expect(r.due).toBe(MIDNIGHT + 3 * DAY)
+    expect(r.due).toBe(MIDNIGHT + DAY + 3 * DAY)
+  })
+
+  it('복습일 전에 맞히면 정답 수만 오르고 상자와 복습일은 그대로', () => {
+    const r1 = nextRecord(undefined, true, NOW)
+    const r2 = nextRecord(r1, true, NOW + 1000)
+    expect(r2).toMatchObject({ box: 1, correct: 2, due: r1.due })
+  })
+
+  it('복습일 전이라도 틀리면 상자 0', () => {
+    const r = nextRecord(nextRecord(undefined, true, NOW), false, NOW + 1000)
+    expect(r).toMatchObject({ box: 0, wrong: 1, due: MIDNIGHT })
   })
 
   it('틀리면 상자 0으로 돌아가고 오늘 바로 복습 대상', () => {
@@ -34,7 +45,7 @@ describe('nextRecord', () => {
 
   it('상자는 최대치를 넘지 않음', () => {
     let r
-    for (let i = 0; i < 10; i++) r = nextRecord(r, true, NOW)
+    for (let i = 0; i < 10; i++) r = nextRecord(r, true, NOW + i * 40 * DAY)
     expect(r.box).toBe(MAX_BOX)
   })
 })
