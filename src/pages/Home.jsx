@@ -1,49 +1,108 @@
 import React, { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import allRounds from '../data/all_rounds.json'
+import { wordImageUrl } from '../utils/image'
 
 function Home() {
   const [searchTerm, setSearchTerm] = useState('')
   const [filteredRounds, setFilteredRounds] = useState(allRounds)
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const currentGroup = searchParams.get('group') || '전체'
 
   useEffect(() => {
-    const filtered = allRounds.filter(round => 
-      round.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      round.words.some(word => 
-        word.en.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        word.ko.includes(searchTerm)
+    let filtered = allRounds;
+
+    // 1. Filter by group (1-20회, etc)
+    if (currentGroup !== '전체') {
+      const [start, end] = currentGroup.replace('회', '').split('-').map(Number);
+      filtered = filtered.filter(round => {
+        // Extract number from "오늘의 영단어 [1회]"
+        const match = round.name.match(/\[(\d+)회\]/);
+        if (match) {
+          const num = parseInt(match[1], 10);
+          return num >= start && num <= end;
+        }
+        return false;
+      });
+    }
+
+    // 2. Filter by search term
+    if (searchTerm) {
+      filtered = filtered.filter(round => 
+        round.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        round.words.some(word => 
+          word.en.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          word.ko.includes(searchTerm)
+        )
       )
-    )
+    }
+
     setFilteredRounds(filtered)
-  }, [searchTerm])
+  }, [searchTerm, currentGroup])
 
   const categories = [...new Set(allRounds.map(r => r.category))]
 
   return (
     <div className="container">
-      <div className="search-container">
-        <input 
-          type="text" 
-          placeholder="회차 또는 단어 검색..." 
-          className="dark-button"
-          style={{ width: '250px', cursor: 'text' }}
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-        <button className="dark-button" onClick={() => setSearchTerm('')}>초기화</button>
+      <div className="home-body" style={{ textAlign: 'center' }}>
+        <h1 className="home-title">
+          오늘의 영단어로 <span className="title-gradient-accent">실력 Up</span>
+        </h1>
+
+        <div className="search-container" style={{ display: 'flex', width: '310px', margin: '50px auto 20px', gap: '8px' }}>
+          <input 
+            type="text" 
+            className="search-input" 
+            placeholder="회차 또는 단어 검색..." 
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            style={{
+              padding: '10px 15px',
+              borderRadius: '12px',
+              border: '1px solid var(--border)',
+              background: 'rgba(2, 6, 23, 0.6)',
+              color: 'var(--text-primary)',
+              fontFamily: 'inherit',
+              outline: 'none',
+              flex: 1
+            }}
+          />
+          <button className="dark-button" onClick={() => setSearchTerm('')} style={{ margin: 0 }}>초기화</button>
+        </div>
+        
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '40px' }}>
+          <div className="sub-tabs-container">
+            {['1-20회', '21-40회', '41-60회', '61-80회', '전체'].map(group => (
+              <button
+                key={group}
+                className={`sub-tab-item ${currentGroup === group ? 'active' : ''}`}
+                onClick={() => {
+                  if (group === '전체') {
+                    searchParams.delete('group')
+                  } else {
+                    searchParams.set('group', group)
+                  }
+                  navigate(`/?${searchParams.toString()}`)
+                }}
+              >
+                {group}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
-      {categories.map(category => (
+      {categories.map((category) => (
         <div key={category} style={{ width: '100%', textAlign: 'center' }}>
-          <h2 className="subtitle">{category}</h2>
+          
           <div className="grid-container">
             {filteredRounds
               .filter(r => r.category === category)
               .map(round => (
                 <div key={round.id} className="item" onClick={() => navigate(`/challenge/${round.id}`)}>
                   <img 
-                    src={`https://word-assets.invinciblebearme.workers.dev/${window.atob(round.words[0].img)}`} 
+                    src={wordImageUrl(round.words[0].img)} 
                     alt={round.name}
                     style={{ objectFit: 'contain' }}
                     onError={(e) => {
@@ -59,7 +118,7 @@ function Home() {
                   }}>
                     이미지<br/>준비중
                   </div>
-                  <p dangerouslySetInnerHTML={{ __html: round.name.replace(' ', '<br/>') }} />
+                  <p>오늘의<br />영단어<br />{round.name.replace('오늘의 영단어 ', '')}</p>
                 </div>
               ))}
           </div>

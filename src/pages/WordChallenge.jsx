@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import allRounds from '../data/all_rounds.json'
+import { addToMyVoca, removeFromMyVoca, isFavorite } from '../utils/storage'
+import { wordImageUrl } from '../utils/image'
 
 function WordChallenge() {
   const { id } = useParams()
@@ -61,33 +63,128 @@ function WordChallenge() {
     }
   };
 
-  // 단어가 바뀔 때(index 변경 시)만 최초 1회 자동 발음
-  useEffect(() => {
-    if (roundData && roundData.words[index]) {
-      speakWord(roundData.words[index].en);
-    }
-  }, [index, roundData]);
+  const currentWord = roundData?.words[index]
+  const imgUrl = wordImageUrl(currentWord?.img)
 
-  // 자동 의미 전환 (영어 <-> 한글 무한 반복)
+  const [imgError, setImgError] = useState(false)
+  const [isListening, setIsListening] = useState(false)
+  const [pronunciationScore, setPronunciationScore] = useState(null)
+  const [fav, setFav] = useState(false)
+  
+  // 단어가 바뀔 때마다 이미지 에러 및 발음 점수 초기화
   useEffect(() => {
-    const timer = setInterval(() => {
-      setShowingEnglish(prev => !prev);
-    }, 1500); // 1.5초 간격 전환
-    return () => clearInterval(timer);
-  }, []);
+    setImgError(false)
+    setPronunciationScore(null)
+    setShowingEnglish(true) // 단어 변경 시 영어부터 표시
+    if (currentWord) {
+      setFav(isFavorite(currentWord.en))
+    }
+  }, [index, id, currentWord])
+
+  const toggleShowingEnglish = () => {
+    setShowingEnglish(prev => !prev)
+  }
+
+  const toggleFavorite = () => {
+    if (fav) {
+      removeFromMyVoca(currentWord.en);
+      setFav(false);
+    } else {
+      addToMyVoca(currentWord);
+      setFav(true);
+    }
+  };
 
   if (!roundData) return <div className="challenge-body">데이터를 불러오는 중...</div>;
 
-  const currentWord = roundData.words[index]
-  const imgUrl = currentWord.img ? `https://word-assets.invinciblebearme.workers.dev/${window.atob(currentWord.img)}` : null
+  // STT 발음 측정 시작
+  const startSTT = () => {
+    // 브라우저 판별
+    const ua = navigator.userAgent;
+    const isWhale = ua.indexOf("Whale") > -1;
+    const isEdge = ua.indexOf("Edg") > -1;
+    const isChrome = !isWhale && !isEdge && /Chrome/.test(ua) && /Google Inc/.test(navigator.vendor);
+    
+    const isSupported = isChrome || isEdge || isWhale;
+    
+    if (!isSupported) {
+      alert("⚠️ 현재 브라우저에서는 음성 인식이 지원되지 않을 수 있습니다.\nChrome, Edge, 또는 Whale 브라우저로 접속하시면 가장 정확하게 작동합니다.");
+    }
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert("이 브라우저는 음성 인식을 지원하지 않습니다. Chrome 브라우저를 설치해 주세요!");
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'en-US';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    recognition.onstart = () => setIsListening(true);
+    recognition.onend = () => setIsListening(false);
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript.toLowerCase().trim();
+      const target = currentWord.en.toLowerCase().trim();
+      
+      let level = 1; // Try Again
+      if (transcript === target) {
+        level = 3; // Excellent
+      } else if (transcript.includes(target) || target.includes(transcript)) {
+        level = 2; // Good
+      }
+      
+      setPronunciationScore({ transcript, level });
+    };
+
+    recognition.onerror = (event) => {
+      console.error("Speech Recognition Error:", event.error);
+      setIsListening(false);
+      
+      const isHttps = window.location.protocol === 'https:';
+
+      if (event.error === 'not-allowed') {
+        alert("🎤 마이크 사용 권한이 거부되었습니다. 주소창 왼쪽의 마이크 아이콘을 클릭하여 권한을 '허용'해 주세요!");
+      } else if (event.error === 'service-not-allowed' || !isHttps) {
+        alert("🔒 보안 연결(HTTPS)이 필요합니다.\n주소창의 주소가 'https://'로 시작하는지 확인해 주세요. (Dothome 등의 서버 설정 확인이 필요할 수 있습니다.)");
+      } else if (event.error === 'network') {
+        alert("🌐 네트워크 연결이 불안정합니다.\n1. 인터넷 연결을 확인해 주세요.\n2. Chrome 브라우저 사용을 권장합니다.\n3. 잠시 후 다시 시도해 주세요.");
+      } else if (event.error === 'no-speech') {
+        // 말소리가 들리지 않았을 때는 alert 대신 상태만 해제 (사용자 경험 개선)
+        console.log("No speech detected.");
+      } else {
+        alert("발음 인식에 실패했습니다. (오류: " + event.error + ")\n잠시 후 다시 시도해 주세요.");
+      }
+    };
+
+    recognition.start();
+  };
 
   return (
     <div className="challenge-body">
       <div className="challenge-container">
-        <h1>{roundData.name}</h1>
+        <h1>
+          {roundData.name}
+        </h1>
         <div className="challenge-index">단어 {index + 1} / {roundData.words.length}</div>
         
-        <div className="challenge-card">
+        <div 
+          className="challenge-card" 
+          onClick={toggleShowingEnglish}
+          style={{ cursor: 'pointer' }}
+        >
+          <button 
+            className={`favorite-btn ${fav ? 'active' : ''}`} 
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleFavorite();
+            }}
+            title="나만의 단어장에 저장"
+          >
+            {fav ? '⭐' : '☆'}
+          </button>
           {showingEnglish ? (
             <div className="word-en">{currentWord.en}</div>
           ) : (
@@ -95,27 +192,44 @@ function WordChallenge() {
           )}
         </div>
 
-        <div className="challenge-image" style={{ 
-          backgroundImage: imgUrl ? `url("${imgUrl}")` : 'none'
-        }}>
-          {!imgUrl && "이미지 없음"}
-          {imgUrl && (
+        <div className="challenge-image">
+          {imgUrl && !imgError ? (
             <img 
               src={imgUrl} 
-              style={{ display: 'none' }} 
-              onError={(e) => {
-                e.target.parentElement.style.backgroundImage = 'none';
-                e.target.parentElement.textContent = '이미지 준비중';
-              }} 
+              alt={currentWord.en}
+              className="word-image"
+              onError={() => setImgError(true)} 
             />
+          ) : (
+            <div className="no-image">{imgUrl ? "이미지 준비중" : "이미지 없음"}</div>
           )}
         </div>
 
+        {pronunciationScore && (
+          <div className={`stt-feedback level-${pronunciationScore.level}`}>
+            {pronunciationScore.level === 3 && "Excellent! ⭐⭐⭐"}
+            {pronunciationScore.level === 2 && "Good Job! ⭐⭐"}
+            {pronunciationScore.level === 1 && "Try Again! ⭐"}
+            <div className="transcript-hint">인식된 발음: "{pronunciationScore.transcript}"</div>
+          </div>
+        )}
+
         <div className="challenge-controls">
-          <button onClick={prevWord}>← 이전</button>
-          <button onClick={nextWord}>다음 →</button>
-          <button onClick={handleManualSpeak}>발음 듣기</button>
-          <button onClick={() => navigate('/')}>목록으로</button>
+          <button onClick={prevWord} className="nav-btn-premium">이전</button>
+          <button onClick={nextWord} className="nav-btn-premium">다음</button>
+          <button onClick={handleManualSpeak} className="nav-btn-premium">발음 듣기</button>
+          <button onClick={() => navigate('/')} className="nav-btn-premium">목록으로</button>
+        </div>
+
+        <div className="stt-controls">
+          <button 
+            className={`mic-button ${isListening ? 'listening' : ''}`} 
+            onClick={startSTT}
+            disabled={isListening}
+          >
+            {isListening ? "🎤 측정중..." : "🎤 발음하기"}
+          </button>
+          <div className="mic-hint">※ 크롬, 엣지, 웨일 브라우저에서 발음 확인이 가능합니다.</div>
         </div>
       </div>
     </div>

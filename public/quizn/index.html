@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>교육부 지정 초등영단어 800 — 퀴즈앤 링크 모음</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bl:#1565C0; --bl-l:#E3F2FD; --bl-d:#0D47A1;
+  --cy:#0097A7; --cy-l:#E0F7FA; --cy-d:#006064;
+  --gn:#2E7D32; --gn-l:#E8F5E9; --gn-d:#1B5E20;
+  --or:#E65100; --or-l:#FFF3E0; --or-d:#BF360C;
+  --pk:#AD1457; --pk-l:#FCE4EC; --pk-d:#880E4F;
+  --pu:#6A1B9A; --pu-l:#F3E5F5; --pu-d:#4A148C;
+  --ye:#F9A825; --ye-l:#FFF8E1; --ye-d:#6D4C00;
+  --tl:#00695C; --tl-l:#E0F2F1; --tl-d:#004D40;
+  --bg:#F4F8FF; --white:#FFFFFF;
+  --text:#0D1B2A; --sub:#4A5568; --border:#C5D5EF;
+  --r:12px; --r-sm:8px;
+  --shadow:0 2px 10px rgba(21,101,192,.1);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+/* HERO */
+.hero{background:linear-gradient(135deg,#0D47A1 0%,#1565C0 40%,#0097A7 75%,#00BCD4 100%);padding:2.8rem 1.5rem 2.5rem;text-align:center;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");pointer-events:none;}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);border-radius:20px;padding:5px 14px;font-size:.74rem;font-weight:700;color:#fff;letter-spacing:.08em;margin-bottom:1rem;}
+.hero h1{font-family:'Baloo 2',sans-serif;font-size:clamp(1.8rem,6vw,3rem);font-weight:800;color:#fff;line-height:1.15;margin-bottom:.4rem;}
+.hero h1 span{color:#B3E5FC;}
+.hero p{font-size:.9rem;color:rgba(255,255,255,.82);margin-top:.3rem;}
+.hero-stats{display:inline-flex;gap:1.5rem;margin-top:1.2rem;background:rgba(255,255,255,.12);border-radius:20px;padding:.6rem 1.5rem;border:1px solid rgba(255,255,255,.2);}
+.stat{text-align:center;}
+.stat-num{font-family:'Baloo 2',sans-serif;font-size:1.4rem;font-weight:800;color:#fff;}
+.stat-label{font-size:.65rem;color:rgba(255,255,255,.75);letter-spacing:.06em;font-weight:700;}
+
+/* FILTER BAR */
+.filter-bar{background:var(--white);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(21,101,192,.08);}
+.filter-inner{max-width:660px;margin:0 auto;padding:.7rem 1rem;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;justify-content:center;}
+.filter-label{font-size:.72rem;font-weight:700;color:var(--sub);letter-spacing:.05em;white-space:nowrap;}
+.ftab{padding:.38rem .85rem;border:1.5px solid var(--border);border-radius:20px;background:var(--white);font-family:'Noto Sans KR',sans-serif;font-size:.76rem;font-weight:700;color:var(--sub);cursor:pointer;transition:all .18s;white-space:nowrap;}
+.ftab.on,.ftab:hover{background:var(--bl);border-color:var(--bl);color:#fff;}
+
+/* MAIN */
+main{max-width:660px;margin:0 auto;padding:1.5rem 1rem 4rem;}
+.section-label{font-family:'Baloo 2',sans-serif;font-size:.68rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--bl);margin-bottom:1rem;display:flex;align-items:center;gap:.5rem;}
+.section-label::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* GROUP */
+.group{margin-bottom:2rem;}
+.group-header{display:flex;align-items:center;gap:.7rem;margin-bottom:.9rem;}
+.group-pill{font-family:'Baloo 2',sans-serif;font-size:.72rem;font-weight:800;padding:4px 14px;border-radius:20px;letter-spacing:.05em;}
+.group-range{font-size:.78rem;color:var(--sub);font-family:'Noto Sans KR',sans-serif;}
+
+/* CARD GRID — 5열 고정, 두 줄로 표시 */
+.card-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:.65rem;}
+
+.link-card{display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--white);border:1.5px solid var(--border);border-radius:var(--r);padding:1rem .5rem .85rem;text-align:center;text-decoration:none;color:inherit;box-shadow:var(--shadow);transition:all .22s;position:relative;overflow:hidden;}
+.link-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;border-radius:0 0 var(--r) var(--r);}
+.link-card:hover{transform:translateY(-3px);box-shadow:0 8px 20px rgba(21,101,192,.18);}
+.card-ico{font-size:1.7rem;margin-bottom:.55rem;line-height:1;}
+.card-num{font-family:'Baloo 2',sans-serif;font-size:1.1rem;font-weight:800;line-height:1;}
+
+/* group color themes */
+.g1 .group-pill{background:var(--bl-l);color:var(--bl-d);}
+.g1 .link-card::after{background:var(--bl);}
+.g1 .link-card:hover{border-color:var(--bl);}
+.g1 .card-num{color:var(--bl);}
+
+.g2 .group-pill{background:var(--gn-l);color:var(--gn-d);}
+.g2 .link-card::after{background:var(--gn);}
+.g2 .link-card:hover{border-color:var(--gn);}
+.g2 .card-num{color:var(--gn);}
+
+.g3 .group-pill{background:var(--or-l);color:var(--or-d);}
+.g3 .link-card::after{background:var(--or);}
+.g3 .link-card:hover{border-color:var(--or);}
+.g3 .card-num{color:var(--or);}
+
+.g4 .group-pill{background:var(--pu-l);color:var(--pu-d);}
+.g4 .link-card::after{background:var(--pu);}
+.g4 .link-card:hover{border-color:var(--pu);}
+.g4 .card-num{color:var(--pu);}
+
+.g5 .group-pill{background:var(--tl-l);color:var(--tl-d);}
+.g5 .link-card::after{background:var(--tl);}
+.g5 .link-card:hover{border-color:var(--tl);}
+.g5 .card-num{color:var(--tl);}
+
+.g6 .group-pill{background:var(--pk-l);color:var(--pk-d);}
+.g6 .link-card::after{background:var(--pk);}
+.g6 .link-card:hover{border-color:var(--pk);}
+.g6 .card-num{color:var(--pk);}
+
+.g7 .group-pill{background:var(--cy-l);color:var(--cy-d);}
+.g7 .link-card::after{background:var(--cy);}
+.g7 .link-card:hover{border-color:var(--cy);}
+.g7 .card-num{color:var(--cy);}
+
+.g8 .group-pill{background:var(--ye-l);color:var(--ye-d);}
+.g8 .link-card::after{background:var(--ye);}
+.g8 .link-card:hover{border-color:var(--ye);}
+.g8 .card-num{color:var(--ye-d);}
+
+/* 행 구분선 (5개 후 줄바꿈 시각화) */
+.card-row-divider{grid-column:1/-1;height:0;border-top:1px dashed var(--border);margin:.1rem 0;}
+
+footer{text-align:center;padding:2rem 1rem;font-size:.75rem;color:var(--sub);}
+
+@media(max-width:500px){
+  .card-grid{grid-template-columns:repeat(5,1fr);gap:.4rem;}
+  .card-ico{font-size:1.3rem;margin-bottom:.4rem;}
+  .card-num{font-size:.9rem;}
+}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-badge">📚 교육부 지정 초등 영어 단어</div>
+  <h1>영단어 <span>800</span><br>퀴즈앤 링크 모음</h1>
+  <p>1회부터 80회까지 · 회당 10단어 · 총 800단어</p>
+  <div class="hero-stats">
+    <div class="stat"><div class="stat-num">80</div><div class="stat-label">ROUNDS</div></div>
+    <div class="stat"><div class="stat-num">800</div><div class="stat-label">WORDS</div></div>
+    <div class="stat"><div class="stat-num">10</div><div class="stat-label">GROUPS</div></div>
+  </div>
+</div>
+
+<div class="filter-bar">
+  <div class="filter-inner">
+    <span class="filter-label">묶음 :</span>
+    <button class="ftab on" onclick="filterGroup('all',this)">전체 80회</button>
+    <button class="ftab" onclick="filterGroup('g1',this)">1–10회</button>
+    <button class="ftab" onclick="filterGroup('g2',this)">11–20회</button>
+    <button class="ftab" onclick="filterGroup('g3',this)">21–30회</button>
+    <button class="ftab" onclick="filterGroup('g4',this)">31–40회</button>
+    <button class="ftab" onclick="filterGroup('g5',this)">41–50회</button>
+    <button class="ftab" onclick="filterGroup('g6',this)">51–60회</button>
+    <button class="ftab" onclick="filterGroup('g7',this)">61–70회</button>
+    <button class="ftab" onclick="filterGroup('g8',this)">71–80회</button>
+  </div>
+</div>
+
+<main>
+  <div class="section-label">Quiz&amp;N 링크 — 클릭하면 새 탭에서 열립니다</div>
+
+  <!-- GROUP 1: 1-10 -->
+  <div class="group g1" data-group="g1">
+    <div class="group-header">
+      <span class="group-pill">1–10회</span>
+      <span class="group-range">단어 1–100번</span>
+    </div>
+    <div class="card-grid">
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720051" target="_blank"><span class="card-ico">👋</span><div class="card-num">1회</div></a>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720090" target="_blank"><span class="card-ico">🔢</span><div class="card-num">2회</div></a>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720096" target="_blank"><span class="card-ico">🎨</span><div class="card-num">3회</div></a>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720098" target="_blank"><span class="card-ico">👁️</span><div class="card-num">4회</div></a>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720105" target="_blank"><span class="card-ico">🖐️</span><div class="card-num">5회</div></a>
+      <div class="card-row-divider"></div>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720139" target="_blank"><span class="card-ico">👨‍👩‍👧</span><div class="card-num">6회</div></a>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720146" target="_blank"><span class="card-ico">🏠</span><div class="card-num">7회</div></a>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720148" target="_blank"><span class="card-ico">🍎</span><div class="card-num">8회</div></a>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720149" target="_blank"><span class="card-ico">🐶</span><div class="card-num">9회</div></a>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720152" target="_blank"><span class="card-ico">📅</span><div class="card-num">10회</div></a>
+    </div>
+  </div>
+
+  <!-- GROUP 2: 11-20 -->
+  <div class="group g2" data-group="g2">
+    <div class="group-header">
+      <span class="group-pill">11–20회</span>
+      <span class="group-range">단어 101–200번</span>
+    </div>
+    <div class="card-grid">
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720163" target="_blank"><span class="card-ico">☀️</span><div class="card-num">11회</div></a>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720165" target="_blank"><span class="card-ico">🍂</span><div class="card-num">12회</div></a>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720167" target="_blank"><span class="card-ico">🏫</span><div class="card-num">13회</div></a>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720170" target="_blank"><span class="card-ico">✏️</span><div class="card-num">14회</div></a>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720172" target="_blank"><span class="card-ico">👩‍🏫</span><div class="card-num">15회</div></a>
+      <div class="card-row-divider"></div>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720173" target="_blank"><span class="card-ico">🚗</span><div class="card-num">16회</div></a>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720174" target="_blank"><span class="card-ico">🏙️</span><div class="card-num">17회</div></a>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720176" target="_blank"><span class="card-ico">🍽️</span><div class="card-num">18회</div></a>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720179" target="_blank"><span class="card-ico">👕</span><div class="card-num">19회</div></a>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720180" target="_blank"><span class="card-ico">⚽</span><div class="card-num">20회</div></a>
+    </div>
+  </div>
+
+  <!-- GROUP 3: 21-30 -->
+  <div class="group g3" data-group="g3">
+    <div class="group-header">
+      <span class="group-pill">21–30회</span>
+      <span class="group-range">단어 201–300번</span>
+    </div>
+    <div class="card-grid">
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720212" target="_blank"><span class="card-ico">🌳</span><div class="card-num">21회</div></a>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720214" target="_blank"><span class="card-ico">🎵</span><div class="card-num">22회</div></a>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720215" target="_blank"><span class="card-ico">😊</span><div class="card-num">23회</div></a>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720218" target="_blank"><span class="card-ico">📐</span><div class="card-num">24회</div></a>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720219" target="_blank"><span class="card-ico">🌈</span><div class="card-num">25회</div></a>
+      <div class="card-row-divider"></div>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720221" target="_blank"><span class="card-ico">⬆️</span><div class="card-num">26회</div></a>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720223" target="_blank"><span class="card-ico">⏰</span><div class="card-num">27회</div></a>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720225" target="_blank"><span class="card-ico">🦁</span><div class="card-num">28회</div></a>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720226" target="_blank"><span class="card-ico">🐠</span><div class="card-num">29회</div></a>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720228" target="_blank"><span class="card-ico">🥦</span><div class="card-num">30회</div></a>
+    </div>
+  </div>
+
+  <!-- GROUP 4: 31-40 -->
+  <div class="group g4" data-group="g4">
+    <div class="group-header">
+      <span class="group-pill">31–40회</span>
+      <span class="group-range">단어 301–400번</span>
+    </div>
+    <div class="card-grid">
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720231" target="_blank"><span class="card-ico">🏃</span><div class="card-num">31회</div></a>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720238" target="_blank"><span class="card-ico">✍️</span><div class="card-num">32회</div></a>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720232" target="_blank"><span class="card-ico">🩺</span><div class="card-num">33회</div></a>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720241" target="_blank"><span class="card-ico">🏥</span><div class="card-num">34회</div></a>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720244" target="_blank"><span class="card-ico">🎮</span><div class="card-num">35회</div></a>
+      <div class="card-row-divider"></div>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720245" target="_blank"><span class="card-ico">📺</span><div class="card-num">36회</div></a>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720246" target="_blank"><span class="card-ico">🛒</span><div class="card-num">37회</div></a>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720247" target="_blank"><span class="card-ico">💰</span><div class="card-num">38회</div></a>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720250" target="_blank"><span class="card-ico">🌍</span><div class="card-num">39회</div></a>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720251" target="_blank"><span class="card-ico">🎉</span><div class="card-num">40회</div></a>
+    </div>
+  </div>
+
+  <!-- GROUP 5: 41-50 -->
+  <div class="group g5" data-group="g5">
+    <div class="group-header">
+      <span class="group-pill">41–50회</span>
+      <span class="group-range">단어 401–500번</span>
+    </div>
+    <div class="card-grid">
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720294" target="_blank"><span class="card-ico">📚</span><div class="card-num">41회</div></a>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720295" target="_blank"><span class="card-ico">🎒</span><div class="card-num">42회</div></a>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720298" target="_blank"><span class="card-ico">🍕</span><div class="card-num">43회</div></a>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720299" target="_blank"><span class="card-ico">🥤</span><div class="card-num">44회</div></a>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720300" target="_blank"><span class="card-ico">🌸</span><div class="card-num">45회</div></a>
+      <div class="card-row-divider"></div>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720303" target="_blank"><span class="card-ico">🌊</span><div class="card-num">46회</div></a>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720304" target="_blank"><span class="card-ico">⛰️</span><div class="card-num">47회</div></a>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720306" target="_blank"><span class="card-ico">🌙</span><div class="card-num">48회</div></a>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720308" target="_blank"><span class="card-ico">🔬</span><div class="card-num">49회</div></a>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720312" target="_blank"><span class="card-ico">💻</span><div class="card-num">50회</div></a>
+    </div>
+  </div>
+
+  <!-- GROUP 6: 51-60 -->
+  <div class="group g6" data-group="g6">
+    <div class="group-header">
+      <span class="group-pill">51–60회</span>
+      <span class="group-range">단어 501–600번</span>
+    </div>
+    <div class="card-grid">
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720476" target="_blank"><span class="card-ico">✈️</span><div class="card-num">51회</div></a>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720477" target="_blank"><span class="card-ico">🏨</span><div class="card-num">52회</div></a>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720478" target="_blank"><span class="card-ico">🗺️</span><div class="card-num">53회</div></a>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720482" target="_blank"><span class="card-ico">🎭</span><div class="card-num">54회</div></a>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720484" target="_blank"><span class="card-ico">👀</span><div class="card-num">55회</div></a>
+      <div class="card-row-divider"></div>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720485" target="_blank"><span class="card-ico">💪</span><div class="card-num">56회</div></a>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720486" target="_blank"><span class="card-ico">🔄</span><div class="card-num">57회</div></a>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720490" target="_blank"><span class="card-ico">🔗</span><div class="card-num">58회</div></a>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720491" target="_blank"><span class="card-ico">❓</span><div class="card-num">59회</div></a>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720493" target="_blank"><span class="card-ico">💬</span><div class="card-num">60회</div></a>
+    </div>
+  </div>
+
+  <!-- GROUP 7: 61-70 -->
+  <div class="group g7" data-group="g7">
+    <div class="group-header">
+      <span class="group-pill">61–70회</span>
+      <span class="group-range">단어 601–700번</span>
+    </div>
+    <div class="card-grid">
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720495" target="_blank"><span class="card-ico">🏘️</span><div class="card-num">61회</div></a>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720496" target="_blank"><span class="card-ico">♻️</span><div class="card-num">62회</div></a>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720498" target="_blank"><span class="card-ico">🏊</span><div class="card-num">63회</div></a>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720499" target="_blank"><span class="card-ico">🎸</span><div class="card-num">64회</div></a>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720501" target="_blank"><span class="card-ico">🖼️</span><div class="card-num">65회</div></a>
+      <div class="card-row-divider"></div>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720502" target="_blank"><span class="card-ico">📖</span><div class="card-num">66회</div></a>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720504" target="_blank"><span class="card-ico">🤝</span><div class="card-num">67회</div></a>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720506" target="_blank"><span class="card-ico">🧠</span><div class="card-num">68회</div></a>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720512" target="_blank"><span class="card-ico">🔧</span><div class="card-num">69회</div></a>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720515" target="_blank"><span class="card-ico">🏗️</span><div class="card-num">70회</div></a>
+    </div>
+  </div>
+
+  <!-- GROUP 8: 71-80 -->
+  <div class="group g8" data-group="g8">
+    <div class="group-header">
+      <span class="group-pill">71–80회</span>
+      <span class="group-range">단어 701–800번</span>
+    </div>
+    <div class="card-grid">
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720519" target="_blank"><span class="card-ico">🎯</span><div class="card-num">71회</div></a>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720522" target="_blank"><span class="card-ico">🗣️</span><div class="card-num">72회</div></a>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720524" target="_blank"><span class="card-ico">💡</span><div class="card-num">73회</div></a>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720525" target="_blank"><span class="card-ico">📝</span><div class="card-num">74회</div></a>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720526" target="_blank"><span class="card-ico">🌟</span><div class="card-num">75회</div></a>
+      <div class="card-row-divider"></div>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720528" target="_blank"><span class="card-ico">🏆</span><div class="card-num">76회</div></a>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720530" target="_blank"><span class="card-ico">🔑</span><div class="card-num">77회</div></a>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720532" target="_blank"><span class="card-ico">📊</span><div class="card-num">78회</div></a>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720533" target="_blank"><span class="card-ico">🔁</span><div class="card-num">79회</div></a>
+      <a class="link-card" href="https://quizn.show/quz/show/myShowDetail.do?showSeq=720534" target="_blank"><span class="card-ico">🎓</span><div class="card-num">80회</div></a>
+    </div>
+  </div>
+
+</main>
+
+<footer>교육부 지정 초등 영어 필수 어휘 800 · 퀴즈앤(Quiz&N) 링크 모음 · 군산초등학교</footer>
+
+<script>
+function filterGroup(target, btn) {
+  document.querySelectorAll('.ftab').forEach(t => t.classList.remove('on'));
+  btn.classList.add('on');
+  document.querySelectorAll('.group').forEach(g => {
+    g.style.display = (target === 'all' || g.dataset.group === target) ? '' : 'none';
+  });
+}
+</script>
+</body>
+</html>
