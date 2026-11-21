@@ -4,6 +4,7 @@ import allRounds from '../data/all_rounds.json'
 import { wordImageUrl } from '../utils/image'
 import { clickable } from '../utils/a11y'
 import { loadProgress, roundSummary, getDueWords } from '../utils/progress'
+import { loadActivity, streakInfo, DAILY_GOAL } from '../utils/activity'
 
 const ALL_WORDS = allRounds.flatMap((r) => r.words)
 
@@ -15,6 +16,7 @@ function Home() {
   const currentGroup = searchParams.get('group') || '전체'
   const progress = useMemo(() => loadProgress(), [])
   const dueCount = useMemo(() => getDueWords(ALL_WORDS, progress, Date.now(), Infinity).length, [progress])
+  const streak = useMemo(() => streakInfo(loadActivity()), [])
 
   useEffect(() => {
     let filtered = allRounds;
@@ -56,11 +58,16 @@ function Home() {
           오늘의 영단어로 <span className="title-gradient-accent">실력 Up</span>
         </h1>
 
-        {dueCount > 0 && (
-          <button className="review-banner" onClick={() => navigate('/review')}>
-            🔁 오늘 복습할 단어가 <b>{dueCount}개</b> 있어요
-          </button>
-        )}
+        <button className={`review-banner ${streak.goalDone ? 'done' : ''}`} onClick={() => navigate('/review')}>
+          {streak.current > 0 && <span className="banner-streak">🔥 {streak.current}일 연속</span>}
+          {streak.goalDone
+            ? <span>🎯 오늘 목표 완료! 더 해 볼까요?</span>
+            : streak.today > 0
+              ? <span>오늘 <b>{streak.today}</b>/{DAILY_GOAL}문제 · 이어서 하기</span>
+              : dueCount > 0
+                ? <span>오늘 복습할 단어 <b>{dueCount}개</b> · 오늘의 학습 시작</span>
+                : <span>▶️ 오늘의 학습 시작하기</span>}
+        </button>
 
         <div className="search-container" style={{ display: 'flex', width: '310px', margin: '50px auto 20px', gap: '8px' }}>
           <input 

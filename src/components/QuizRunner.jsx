@@ -4,6 +4,9 @@ import { buildQuiz, normalizeAnswer, TYPE_LABELS } from '../utils/quiz'
 import { recordAnswer, levelOf, LEVELS } from '../utils/progress'
 import { canSpeak, speak } from '../utils/speech'
 import { wordImageUrl } from '../utils/image'
+import { loadActivity, streakInfo, DAILY_GOAL } from '../utils/activity'
+import { currentBadges } from '../utils/badges'
+import { useToast } from './Toast'
 
 const ALL_WORDS = allRounds.flatMap((r) => r.words)
 
@@ -19,6 +22,10 @@ function QuizRunner({ words, title, onExit, exitLabel = '목록으로' }) {
   const [typed, setTyped] = useState('')
   const [results, setResults] = useState([]) // { word, correct, level }
   const inputRef = useRef(null)
+  const toast = useToast()
+  // 퀴즈 시작 시점에 이미 받은 배지 → 결과 화면에서 새로 받은 배지만 보여 준다
+  const earnedIds = () => new Set(currentBadges(allRounds).filter((b) => b.earned).map((b) => b.id))
+  const [badgesBefore, setBadgesBefore] = useState(earnedIds)
 
   const q = questions[index]
   const answered = selected !== null
@@ -39,6 +46,12 @@ function QuizRunner({ words, title, onExit, exitLabel = '목록으로' }) {
       ? normalizeAnswer(value) === normalizeAnswer(q.word.en)
       : value === q.answer
     const rec = recordAnswer(q.word.en, correct)
+    const streak = streakInfo(loadActivity())
+    if (streak.today === 1 && streak.current >= 2) {
+      toast(`🔥 ${streak.current}일 연속 공부 중이에요!`, { type: 'success' })
+    } else if (streak.today === DAILY_GOAL) {
+      toast(`🎯 오늘 목표 ${DAILY_GOAL}문제를 채웠어요!`, { type: 'success' })
+    }
     setSelected(value)
     setResults((prev) => [...prev, { word: q.word, correct, level: levelOf(rec) }])
     if (correct && q.type !== 'audio2ko') speak(q.word.en)
@@ -51,6 +64,7 @@ function QuizRunner({ words, title, onExit, exitLabel = '목록으로' }) {
   }
 
   const restartWith = (list) => {
+    setBadgesBefore(earnedIds())
     setQuizWords(list)
     setIndex(0)
     setSelected(null)
@@ -75,6 +89,7 @@ function QuizRunner({ words, title, onExit, exitLabel = '목록으로' }) {
     const correctCount = results.filter((r) => r.correct).length
     const wrong = results.filter((r) => !r.correct).map((r) => r.word)
     const ratio = correctCount / results.length
+    const newBadges = currentBadges(allRounds).filter((b) => b.earned && !badgesBefore.has(b.id))
     return (
       <div className="challenge-body">
         <div className="challenge-container">
@@ -85,6 +100,14 @@ function QuizRunner({ words, title, onExit, exitLabel = '목록으로' }) {
               {ratio === 1 ? '모두 맞혔어요! 최고예요! 🎉' : ratio >= 0.7 ? '잘했어요! 틀린 단어만 한 번 더 볼까요? 👍' : '괜찮아요. 틀린 단어를 다시 풀어 봐요! 💪'}
             </div>
           </div>
+          {newBadges.length > 0 && (
+            <div className="quiz-new-badges" role="status">
+              <div className="quiz-new-badges-title">새 배지를 받았어요!</div>
+              {newBadges.map((b) => (
+                <span key={b.id} className="badge earned"><span aria-hidden="true">{b.emoji}</span> {b.name}</span>
+              ))}
+            </div>
+          )}
           <ul className="quiz-result-list">
             {results.map((r, i) => (
               <li key={i} className={r.correct ? 'ok' : 'ng'}>

@@ -1,8 +1,10 @@
 // 단어별 학습 기록 (Leitner 상자 방식 간격 반복)
 // localStorage key: word_progress_v1
 // { [en]: { box, correct, wrong, due, lastSeen } }
-//   box  0~5  : 숙련도. 맞히면 +1, 틀리면 0으로
+//   box  0~5  : 숙련도. 복습할 날에 맞히면 +1, 틀리면 언제든 0으로
 //   due       : 다음 복습 날짜(자정 기준 timestamp)
+
+import { logAnswer } from './activity'
 
 const STORAGE_KEY = 'word_progress_v1'
 const DAY = 24 * 60 * 60 * 1000
@@ -43,13 +45,16 @@ const saveProgress = (data) => {
 // 순수 함수: 기존 기록 + 정답 여부 → 새 기록
 export const nextRecord = (rec, isCorrect, now = Date.now()) => {
   const prev = rec || { box: 0, correct: 0, wrong: 0 }
-  const box = isCorrect ? Math.min(prev.box + 1, MAX_BOX) : 0
+  // 복습할 날이 되기 전에 맞힌 것은 정답 수만 올리고 상자는 그대로 둔다.
+  // (같은 날 여러 번 풀어 '완전히 앎'까지 올라가는 것을 막아 간격 반복이 의미 있게)
+  const isDue = prev.due == null || prev.due <= now
+  const box = isCorrect ? (isDue ? Math.min(prev.box + 1, MAX_BOX) : prev.box) : 0
   return {
     ...prev,
     box,
     correct: prev.correct + (isCorrect ? 1 : 0),
     wrong: prev.wrong + (isCorrect ? 0 : 1),
-    due: startOfDay(now) + INTERVAL_DAYS[box] * DAY,
+    due: isCorrect && !isDue ? prev.due : startOfDay(now) + INTERVAL_DAYS[box] * DAY,
     lastSeen: now,
   }
 }
@@ -58,6 +63,7 @@ export const recordAnswer = (en, isCorrect, now = Date.now()) => {
   const data = loadProgress()
   data[en] = nextRecord(data[en], isCorrect, now)
   saveProgress(data)
+  logAnswer(isCorrect, now)
   return data[en]
 }
 
