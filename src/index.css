@@ -1713,3 +1713,414 @@ button.letter-card {
     border-radius: 12px;
     background: rgba(15, 23, 42, 0.88);
 }
+
+/* ===== 교육 기능 C: 예문 · 빈칸 · 소리 패턴 · 나만의 문장 ===== */
+.entry-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    margin: -20px auto 30px;
+    max-width: 420px;
+}
+
+.entry-row .topic-entry {
+    margin: 0;
+}
+
+.ex-word {
+    color: #fde047;
+}
+
+.example-box {
+    width: 100%;
+    max-width: 340px;
+    margin: 4px auto 12px;
+    padding: 10px 14px;
+    border-radius: 14px;
+    background: rgba(2, 6, 23, 0.55);
+    border: 1px solid rgba(253, 224, 71, 0.25);
+    text-align: left;
+}
+
+.example-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.example-label {
+    font-size: 0.72rem;
+    color: #fde047;
+    letter-spacing: 0.05em;
+}
+
+.example-speak,
+.example-ko-btn {
+    border: none;
+    background: rgba(255, 255, 255, 0.08);
+    color: #e2e8f0;
+    border-radius: 8px;
+    padding: 3px 8px;
+    font-size: 0.78rem;
+    cursor: pointer;
+}
+
+.example-en {
+    margin: 6px 0 4px;
+    font-size: 1.02rem;
+    color: #f8fafc;
+    line-height: 1.4;
+}
+
+.example-ko {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #94a3b8;
+}
+
+.cloze-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 6px;
+}
+
+.cloze-sentence {
+    font-size: 1.15rem;
+    line-height: 1.5;
+    color: #f8fafc;
+}
+
+.cloze-blank {
+    display: inline-block;
+    min-width: 4.5em;
+    border-bottom: 3px solid #38bdf8;
+    margin: 0 2px;
+}
+
+.cloze-ko {
+    font-size: 0.85rem;
+    color: #94a3b8;
+}
+
+.ph-group {
+    width: 92%;
+    max-width: 520px;
+    margin: 22px auto 0;
+    text-align: left;
+}
+
+.ph-group-title {
+    font-size: 1.02rem;
+    color: #e2e8f0;
+    margin: 0;
+}
+
+.ph-group-desc {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    margin: 4px 0 8px;
+}
+
+.ph-grid {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+    gap: 8px;
+}
+
+.ph-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 10px 6px;
+    border-radius: 12px;
+    background: rgba(2, 6, 23, 0.5);
+    border: 1px solid rgba(56, 189, 248, 0.2);
+    cursor: pointer;
+}
+
+.ph-card:hover {
+    border-color: rgba(56, 189, 248, 0.6);
+}
+
+.ph-label {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #e0f2fe;
+}
+
+.ph-sample {
+    font-size: 0.85rem;
+    color: #cbd5e1;
+}
+
+.ph-mark {
+    color: #f472b6;
+}
+
+.ph-note {
+    max-width: 380px;
+    margin: 0 auto 6px;
+    font-size: 0.88rem;
+    color: #e2e8f0;
+}
+
+.ph-word .quiz-result-word {
+    font-size: 1.05rem;
+}
+
+.sentences-page .review-section {
+    max-width: 420px;
+}
+
+.sentence-maker {
+    align-items: stretch;
+}
+
+.sentence-step {
+    font-weight: 700;
+    color: #e2e8f0;
+    text-align: left;
+}
+
+.sentence-step small {
+    color: #94a3b8;
+    font-weight: normal;
+}
+
+.word-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.word-chip {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 6px 10px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(2, 6, 23, 0.5);
+    color: #f8fafc;
+    font-size: 0.95rem;
+    cursor: pointer;
+}
+
+.word-chip small {
+    font-size: 0.68rem;
+    color: #94a3b8;
+}
+
+.word-chip.on {
+    border-color: #38bdf8;
+    background: rgba(56, 189, 248, 0.2);
+}
+
+.sentence-maker > .sub-tab-item {
+    align-self: flex-start;
+}
+
+.sentence-input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: rgba(2, 6, 23, 0.6);
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 1rem;
+    resize: vertical;
+}
+
+.sentence-checks {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+    font-size: 0.82rem;
+    color: #94a3b8;
+}
+
+.sentence-checks .ok {
+    color: #86efac;
+}
+
+.sentence-checks .warn {
+    color: #fca5a5;
+}
+
+.sentence-checks .tip {
+    color: #fde68a;
+}
+
+.sentence-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+}
+
+.sentence-hints {
+    margin: 0;
+    padding-left: 18px;
+    text-align: left;
+    font-size: 0.88rem;
+    color: #e2e8f0;
+}
+
+.sentence-hints small {
+    display: block;
+    color: #94a3b8;
+}
+
+.sentence-saved-head {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.sentence-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.sentence-list li {
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: rgba(2, 6, 23, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    text-align: left;
+}
+
+.sentence-text {
+    margin: 0 0 4px;
+    color: #f8fafc;
+    font-size: 1rem;
+}
+
+.sentence-text u {
+    text-decoration-color: #38bdf8;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 3px;
+}
+
+.sentence-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.75rem;
+    color: #94a3b8;
+}
+
+.sentence-meta span:first-child {
+    flex: 1;
+}
+
+.sentence-meta button {
+    border: none;
+    background: none;
+    color: #e2e8f0;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+/* PDF 학습지 (화면 밖, 흰 배경) */
+.print-sheet {
+    width: 794px;
+    padding: 40px;
+    background: white;
+    color: #1e293b;
+    font-family: sans-serif;
+    box-sizing: border-box;
+    text-align: left;
+}
+
+.print-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding-bottom: 15px;
+    margin-bottom: 25px;
+    border-bottom: 2px solid #0ea5e9;
+}
+
+.print-head h1 {
+    color: #0ea5e9;
+    margin: 0 16px 0 0;
+    font-size: 1.5rem;
+    white-space: nowrap;
+}
+
+.print-head table {
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.print-head th,
+.print-head td {
+    border: 1px solid #cbd5e1;
+    height: 35px;
+    padding: 0 10px;
+}
+
+.print-head th {
+    background: #f8fafc;
+    white-space: nowrap;
+}
+
+.print-list {
+    margin: 0;
+    padding-left: 24px;
+}
+
+.print-list li {
+    margin-bottom: 22px;
+}
+
+.print-words {
+    font-size: 0.85rem;
+    color: #64748b;
+}
+
+.print-sentence {
+    font-size: 1.35rem;
+    margin: 4px 0 6px;
+}
+
+.print-sentence u {
+    text-decoration-color: #0ea5e9;
+}
+
+.print-line {
+    height: 34px;
+    border-bottom: 1px dashed #94a3b8;
+}
+
+.print-foot {
+    margin-top: 20px;
+    padding-top: 14px;
+    border-top: 1px solid #e2e8f0;
+    color: #94a3b8;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+.topics-page > .review-desc {
+    padding: 0 16px;
+}

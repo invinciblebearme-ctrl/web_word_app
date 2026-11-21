@@ -120,7 +120,7 @@ describe('배지', () => {
   it('기록으로부터 계산하고, 연속 학습 배지는 최고 기록 기준', () => {
     const progress = { a: { box: 4, correct: 4, wrong: 0 }, b: { box: 2, correct: 2, wrong: 0 }, c: { box: 1, correct: 1, wrong: 0 } }
     const m = badgeMetrics(rounds, progress, { totalAnswered: 7, best: 3, totalDays: 4 })
-    expect(m).toEqual({ answered: 7, streak: 3, days: 4, mastered: 1, rounds: 1 })
+    expect(m).toEqual({ answered: 7, streak: 3, days: 4, mastered: 1, rounds: 1, sentences: 0 })
     const b = Object.fromEntries(evaluateBadges(m).map((x) => [x.id, x]))
     expect(b['first-1'].earned).toBe(true)
     expect(b['streak-3'].earned).toBe(true)

@@ -4,6 +4,7 @@ import { getMyVoca, removeFromMyVoca } from '../utils/storage'
 import { wordImageUrl } from '../utils/image'
 import { useToast } from '../components/Toast'
 import { clickable } from '../utils/a11y'
+import { exportElementToPdf } from '../utils/pdf'
 
 function VocaItem({ word, handleDelete, speakWord }) {
   const [showKo, setShowKo] = useState(false);
@@ -95,50 +96,9 @@ function MyVocabulary() {
     if (vocaList.length === 0) return
     setIsExporting(true)
 
-    // 캡처 전 스크롤을 상단으로 이동 (html2canvas 오프셋 방지)
-    window.scrollTo(0, 0)
-
     setTimeout(async () => {
       try {
-        // PDF 라이브러리(약 500KB)는 내보내기 버튼을 눌렀을 때만 불러온다
-        const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
-          import('html2canvas'),
-          import('jspdf'),
-        ])
-        const element = printRef.current
-        const canvas = await html2canvas(element, {
-          scale: 2,
-          useCORS: true,
-          backgroundColor: '#ffffff',
-          logging: false,
-          width: 800, // 캔버스 너비 고정
-          onclone: (clonedDoc) => {
-            // 복제된 문서에서 스타일 확인 가능
-            const el = clonedDoc.getElementById('pdf-print-area');
-            if (el) el.style.display = 'block';
-          }
-        })
-
-        const imgData = canvas.toDataURL('image/png')
-        const pdf = new jsPDF('p', 'mm', 'a4')
-        const imgWidth = 210
-        const pageHeight = 297
-        const imgHeight = (canvas.height * imgWidth) / canvas.width
-        let heightLeft = imgHeight
-
-        let position = 0
-
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight)
-        heightLeft -= pageHeight
-
-        while (heightLeft >= 0) {
-          position = heightLeft - imgHeight
-          pdf.addPage()
-          pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight)
-          heightLeft -= pageHeight
-        }
-
-        pdf.save(`나만의_단어장_${new Date().toLocaleDateString()}.pdf`)
+        await exportElementToPdf(printRef.current, `나만의_단어장_${new Date().toLocaleDateString()}.pdf`)
       } catch (error) {
         console.error('PDF export failed:', error)
         toast('PDF를 만드는 중에 문제가 생겼어요. 잠시 뒤 다시 해 보세요.', { type: 'error' })

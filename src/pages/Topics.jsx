@@ -77,15 +77,17 @@ function TopicDetail({ topic, progress, onQuiz }) {
 
 function Topics() {
   const { key } = useParams()
-  const [quiz, setQuiz] = useState(null)
+  // 퀴즈는 시작한 주제 주소와 함께 저장: 퀴즈 중 뒤로 가기로 주소가 바뀌면 그 주소 화면을 보여 준다
+  const [quizState, setQuizState] = useState(null)
+  const quiz = quizState && quizState.key === key ? quizState.words : null
   const progress = useMemo(() => loadProgress(), [quiz, key])
   const topic = key ? TOPIC_BY_KEY[key] : null
 
   if (key && !topic) return <Navigate to="/topics" replace />
   if (quiz) {
-    return <QuizRunner words={quiz} title={`${topic.emoji} ${topic.label} 퀴즈`} onExit={() => setQuiz(null)} exitLabel="주제 화면으로" />
+    return <QuizRunner key={key} words={quiz} title={`${topic.emoji} ${topic.label} 퀴즈`} onExit={() => setQuizState(null)} exitLabel="주제 화면으로" />
   }
-  return topic ? <TopicDetail topic={topic} progress={progress} onQuiz={setQuiz} /> : <TopicList progress={progress} />
+  return topic ? <TopicDetail topic={topic} progress={progress} onQuiz={(words) => setQuizState({ key, words })} /> : <TopicList progress={progress} />
 }
 
 export default Topics

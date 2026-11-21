@@ -110,7 +110,11 @@ function Home() {
             ))}
           </div>
         </div>
-        <button className="topic-entry" onClick={() => navigate('/topics')}>🗂 주제별로 공부하기 <small>동물 · 음식 · 학교 …</small></button>
+        <div className="entry-row">
+          <button className="topic-entry" onClick={() => navigate('/topics')}>🗂 주제별 <small>동물 · 음식 …</small></button>
+          <button className="topic-entry" onClick={() => navigate('/phonics')}>🔤 소리 패턴 <small>sh · ee · -ight …</small></button>
+          <button className="topic-entry" onClick={() => navigate('/sentences')}>✏️ 나만의 문장</button>
+        </div>
       </div>
 
       {categories.map((category) => (

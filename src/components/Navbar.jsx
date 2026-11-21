@@ -6,9 +6,9 @@ function Navbar() {
   const [searchParams] = useSearchParams()
 
   // Reading mode is active for Home AND WordChallenge pages
-  const isReadingActive = location.pathname === '/' || location.pathname.startsWith('/challenge') || location.pathname.startsWith('/quiz') || location.pathname.startsWith('/topics')
+  const isReadingActive = location.pathname === '/' || location.pathname.startsWith('/challenge') || location.pathname.startsWith('/quiz') || location.pathname.startsWith('/topics') || location.pathname.startsWith('/phonics')
   // Writing mode is active for Scramble pages
-  const isWritingActive = location.pathname.startsWith('/scramble')
+  const isWritingActive = location.pathname.startsWith('/scramble') || location.pathname === '/sentences'
   // My Vocabulary mode is active
   const isMyVocaActive = location.pathname === '/my-voca'
   const isReviewActive = location.pathname === '/review'
