@@ -157,3 +157,16 @@ describe('예문 데이터', () => {
     }
   })
 })
+
+describe('쉬운 뜻', () => {
+  it('800단어에 있는 단어만, 원래 뜻과 다를 때만 들어 있음', async () => {
+    const { default: easy } = await import('../../data/easy_meanings.json')
+    const KO = Object.fromEntries(ALL.map((w) => [w.en, w.ko]))
+    const norm = (s) => s.split(/[,/]/).map((t) => t.replace(/[\s~()·.]/g, '')).filter(Boolean).sort().join('|')
+    for (const [en, e] of Object.entries(easy)) {
+      expect(KO[en], en).toBeTruthy()
+      expect(e.trim().length, en).toBeGreaterThan(0)
+      expect(norm(e), en).not.toBe(norm(KO[en]))
+    }
+  })
+})
