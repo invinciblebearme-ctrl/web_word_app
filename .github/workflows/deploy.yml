@@ -1,7 +1,7 @@
 name: Deploy
 
 # main에 머지되면 빌드해서 배포 저장소(TodayVoca800)에 커밋한다.
-# Cloudflare Pages가 TodayVoca800을 보고 있다가 voca.allforedu.kr에 자동 배포한다.
+# Cloudflare Worker today-voca-800(Workers Builds)이 TodayVoca800 push마다 wrangler.jsonc로 배포한다 (voca.allforedu.kr).
 on:
   push:
     branches: [main]

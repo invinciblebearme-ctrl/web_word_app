@@ -1,0 +1,22 @@
+// 배포 저장소(TodayVoca800) 맨 위에 wrangler.jsonc로 복사된다 (scripts/sync-site.sh).
+// Cloudflare Workers Builds가 TodayVoca800 push마다 이 설정으로 `wrangler deploy`를 실행한다.
+{
+  "name": "today-voca-800",
+  "main": "worker/index.js",
+  "compatibility_date": "2026-06-30",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": "./site",
+    "binding": "ASSETS",
+    // /api/* 요청만 Worker를 거친다. 나머지는 정적 파일로 바로 응답 (Worker 요청 수 절약)
+    "run_worker_first": ["/api/*"]
+  },
+  "d1_databases": [
+    {
+      // note.allforedu.kr과 함께 쓰는 단어 앱 공용 DB. 학급 진도 표(classes 등)는 voca_ 표와 겹치지 않는다
+      "binding": "DB",
+      "database_name": "word-app-db",
+      "database_id": "60ea4ccf-a76b-4438-b7ec-c96a20a6924d"
+    }
+  ]
+}

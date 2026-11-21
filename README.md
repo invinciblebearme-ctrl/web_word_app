@@ -45,7 +45,8 @@ src/
   utils/quiz.js     퀴즈 문제 생성
   utils/speech.js   발음 듣기(TTS)와 음성 인식 지원 여부
   utils/classSync.js 학급 진도 보내기 (대기열·재전송), utils/classroom.js 수업 도구
-functions/          Cloudflare Pages Functions (학급 진도 API, /api/classes/...)
+functions/          학급 진도 API (/api/classes/...; 로컬은 Pages Functions, 운영은 worker/가 같은 handle() 사용)
+worker/             운영 Worker 진입점과 wrangler.jsonc (TodayVoca800에 복사됨)
 migrations/         D1 데이터베이스 스키마
 tests/functions/    API 테스트 (node:sqlite로 D1을 흉내 냄)
 public/
@@ -57,23 +58,24 @@ public/
 ## 배포
 
 - `CI` 워크플로가 push와 PR마다 빌드를 검증하고 `dist`를 아티팩트로 올립니다.
-- 사이트(voca.allforedu.kr)는 **Cloudflare Pages**가 배포 전용 저장소 **TodayVoca800**을 보고 배포합니다.
-  - `main`에 머지하면 `Deploy` 워크플로가 테스트·빌드한 뒤 `scripts/sync-site.sh`로 `dist` 내용과 `functions/`, `src/data/all_rounds.json`을 TodayVoca800에 커밋합니다. 그러면 Cloudflare가 자동으로 다시 배포합니다.
+- 사이트(voca.allforedu.kr)는 Cloudflare **Worker `today-voca-800`**이 배포 전용 저장소 **TodayVoca800**을 보고 배포합니다(Workers Builds).
+  - `main`에 머지하면 `Deploy` 워크플로가 테스트·빌드한 뒤 `scripts/sync-site.sh`로 TodayVoca800을 다시 채우고 커밋합니다. 그러면 Cloudflare가 자동으로 `wrangler deploy`를 실행합니다.
+  - TodayVoca800 구조: `site/`(빌드 결과, 정적 파일) · `wrangler.jsonc`(← `worker/wrangler.jsonc`) · `worker/index.js`(`/api/*` 처리) · `functions/_lib/api.js` · `src/data/all_rounds.json`
+  - `/api/*` 요청만 Worker를 거치고, 나머지는 정적 파일로 바로 응답합니다(`run_worker_first`).
+  - D1 연결(`DB` → `word-app-db`)은 `worker/wrangler.jsonc`에 적혀 있어 배포 때 함께 적용됩니다. 대시보드에서 따로 연결하지 않습니다.
   - TodayVoca800은 직접 고치지 마세요. 다음 배포 때 덮어써집니다.
-  - 필요한 설정(한 번만): TodayVoca800에 **쓰기 권한이 있는 Deploy key**를 등록하고, 그 개인 키를 이 저장소 Secrets의 `SITE_DEPLOY_KEY`로 넣습니다.
+  - 필요한 설정(한 번만): TodayVoca800에 **쓰기 권한이 있는 Deploy key**를 등록하고, 그 개인 키를 이 저장소 Secrets의 `SITE_DEPLOY_KEY`로 넣습니다(등록 완료).
   - 수동 실행은 Actions → Deploy → Run workflow (main만). main 최신 커밋이 아닌 실행은 건너뜁니다.
-  - 주소가 `#/...` 형식(HashRouter)이라 `_redirects` 같은 별도 설정은 필요 없습니다.
+  - 주소가 `#/...` 형식(HashRouter)이라 별도 라우팅 설정은 필요 없습니다.
 
 ### 학급 진도 서버 설정 (D1)
 
-학급 진도 기능만 서버가 필요합니다. 설정하지 않아도 나머지 기능은 그대로 쓸 수 있고, 학급 화면에는 "아직 설정되지 않았어요"가 나옵니다.
+학급 진도 기능만 서버가 필요합니다. 서버가 없으면 학급 화면에 "아직 설정되지 않았어요"가 나오고, 나머지 기능은 그대로 쓸 수 있습니다.
 
-1. Cloudflare 대시보드 → **Storage & Databases → D1** → 데이터베이스 준비. 운영에서는 note.allforedu.kr과 함께 쓰는 단어 앱 공용 DB `word-app-db`를 씁니다(그쪽 테이블은 `voca_` 접두사라 겹치지 않음)
-2. 만든 데이터베이스의 **Console**에서 `migrations/0001_class.sql` 내용을 붙여 넣고 실행
-3. Pages 프로젝트(TodayVoca800과 연결된 프로젝트) → **Settings → Bindings → D1 database** 추가: 변수 이름 `DB`, 데이터베이스 `word-app-db` (운영·미리보기 모두)
-4. 다시 배포하면 `/api/classes`가 동작합니다
+- 운영 DB는 note.allforedu.kr과 함께 쓰는 단어 앱 공용 DB **`word-app-db`**입니다. note 앱 표는 `voca_` 접두사라 학급 진도 표(`classes`, `members`, `word_stats`, `sync_batches`)와 겹치지 않습니다.
+- 표는 `migrations/0001_class.sql`로 만들었습니다(적용 완료). 바꿀 때는 새 SQL 파일을 추가해 D1 콘솔이나 `wrangler d1 execute word-app-db --remote --file ...`로 실행합니다.
 
-로컬 확인: `npx wrangler pages dev dist --d1 DB=local-class` (스키마는 `wrangler d1 execute ... --local --file migrations/0001_class.sql`로 적용)
+로컬 확인: `npx wrangler pages dev dist --d1 DB=local-class` (또는 배포 구조 그대로 TodayVoca800 복사본에서 `wrangler dev --local`) (스키마는 `wrangler d1 execute ... --local --file migrations/0001_class.sql`로 적용)
 
 **개인정보**: 학생 이름·이메일·IP는 받거나 저장하지 않습니다. 학생은 학급 코드 + 출석번호(1~99)와 기기마다 무작위로 만든 번호로만 구분합니다. 선생님 키는 해시로만 저장하며, 학급을 지우면 그 학급의 모든 기록이 함께 지워집니다. 학생이 학급에서 나가면 그 학생의 번호별 기록은 지워지고, 단어별 익명 집계만 남습니다.
 
