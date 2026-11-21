@@ -331,6 +331,9 @@ function WordChallenge() {
         <button className="quiz-start-btn" onClick={() => navigate(`/quiz/${roundData.id}`)}>
           📝 이 회차 퀴즈 풀기
         </button>
+        <a className="quiz-start-btn game-start-btn" href={`./WordGame/?round=${roundData.id}`}>
+          🎮 이 회차로 단어 팡팡
+        </a>
 
         {sttSupported ? (
           <div className="stt-controls">

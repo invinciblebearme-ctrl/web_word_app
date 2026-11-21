@@ -212,7 +212,9 @@
       justify-content: center; align-items: center;
       z-index: 100; text-align: center;
       padding: 20px;
+      overflow-y: auto; justify-content: safe center;
     }
+    #overlay > * { flex-shrink: 0; }
 
     /* Hero 타이틀 영역 */
     .overlay-hero {
@@ -316,6 +318,24 @@
       margin: 4px 0 16px; border-radius: 1px;
     }
 
+    /* ── 오늘의 영단어 회차 선택 ── */
+    #roundSelectWrap {
+      display: none; margin-top: 14px;
+      background: var(--white); border: 2px solid var(--border);
+      border-radius: 16px; padding: 14px 20px;
+      min-width: 480px; box-shadow: var(--shadow);
+      font-family: 'Noto Sans KR', sans-serif;
+    }
+    #roundSelectWrap p { font-size: .82rem; color: var(--sub); margin-bottom: 10px; font-weight: 700; }
+    .round-row { display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; }
+    .round-row .select-style { flex: none; min-width: 96px; }
+    .round-row span { color: var(--sub); font-weight: 700; }
+    .round-row .sheet-btn.active { cursor: default; }
+    .or-divider { margin-top: 12px; font-size: .8rem; color: var(--sub); font-family: 'Noto Sans KR', sans-serif; }
+    @media (max-width: 560px) {
+      #roundSelectWrap, #sheetSelectWrap, #setupControls { min-width: 0; width: 100%; box-sizing: border-box; }
+    }
+
     /* ── 시트 선택 ── */
     #sheetSelectWrap {
       display: none; margin-top: 14px;
@@ -398,7 +418,19 @@
       <p>떨어지는 단어를 터치해서 맞춰보세요!</p>
     </div>
 
-    <p id="statusText">단어장(엑셀 파일)을 선택해주세요!</p>
+    <p id="statusText">오늘의 영단어 회차를 고르거나 엑셀 단어장을 선택해주세요!</p>
+
+    <!-- 오늘의 영단어 회차 선택 (rounds.json 은 빌드 때 만들어진다) -->
+    <div id="roundSelectWrap">
+      <p>📘 오늘의 영단어 회차 <small>(여러 회차를 묶으려면 끝 회차를 바꾸세요)</small></p>
+      <div class="round-row">
+        <select id="roundFrom" class="select-style" aria-label="시작 회차"></select>
+        <span>~</span>
+        <select id="roundTo" class="select-style" aria-label="끝 회차"></select>
+        <button type="button" id="roundUseBtn" class="sheet-btn">이 회차로 하기</button>
+      </div>
+    </div>
+    <p class="or-divider" id="orDivider" style="display:none">또는</p>
 
     <div class="file-upload-wrapper" id="uploadWrapper">
       <button class="btn">📁 엑셀 파일 고르기</button>
@@ -625,7 +657,7 @@
           btn.className = 'sheet-btn';
           btn.textContent = name;
           btn.onclick = () => {
-            document.querySelectorAll('.sheet-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('#sheetBtnGrid .sheet-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             loadSheet(name);
           };
@@ -656,13 +688,81 @@
         return;
       }
       wordsData = loaded;
+      userPickedWords = true;
+      document.getElementById('roundUseBtn').classList.remove('active');
       document.getElementById('statusText').innerHTML =
         `📂 <b>${safeName}</b> · 총 <b>${wordsData.length}</b>개 단어 준비 완료!`;
       document.getElementById('setupControls').style.display = 'block';
       document.getElementById('startBtn').style.display = 'block';
     }
 
-    window.onload = () => { initCamera(); toggleMirror(); };
+    // ── 오늘의 영단어 회차 ──
+    let roundsData = [];
+    let userPickedWords = false; // 엑셀이나 회차를 직접 골랐으면 링크의 회차로 덮어쓰지 않는다
+
+    async function loadRounds() {
+      try {
+        const res = await fetch('rounds.json');
+        if (!res.ok) throw new Error(res.status);
+        roundsData = await res.json();
+      } catch (e) {
+        return; // 회차 목록을 못 받으면 엑셀만 쓴다
+      }
+      if (!roundsData.length) return;
+      const from = document.getElementById('roundFrom');
+      const to = document.getElementById('roundTo');
+      for (const sel of [from, to]) {
+        sel.innerHTML = roundsData.map(r => `<option value="${r.id}">${r.id}회</option>`).join('');
+      }
+      from.onchange = () => { if (+to.value < +from.value) to.value = from.value; markRoundDirty(); };
+      to.onchange = () => { if (+to.value < +from.value) from.value = to.value; markRoundDirty(); };
+      document.getElementById('roundUseBtn').onclick = () => { userPickedWords = true; applyRounds(); };
+      document.getElementById('roundSelectWrap').style.display = 'block';
+      document.getElementById('orDivider').style.display = 'block';
+
+      // ?round=12 또는 ?round=10-12 로 들어오면 바로 준비
+      const m = /^(\d+)(?:-(\d+))?$/.exec(new URLSearchParams(location.search).get('round') || '');
+      const ids = roundsData.map(r => r.id);
+      const idle = !userPickedWords && document.getElementById('overlay').style.display !== 'none';
+      if (idle && m && ids.includes(+m[1])) {
+        const end = m[2] && ids.includes(+m[2]) && +m[2] >= +m[1] ? +m[2] : +m[1];
+        from.value = m[1]; to.value = String(end);
+        applyRounds();
+      }
+    }
+
+    function markRoundDirty() {
+      document.getElementById('roundUseBtn').classList.remove('active');
+      document.getElementById('roundUseBtn').textContent = '이 회차로 하기';
+    }
+
+    function applyRounds() {
+      const a = +document.getElementById('roundFrom').value;
+      const b = +document.getElementById('roundTo').value;
+      const seen = new Set();
+      const loaded = [];
+      for (const r of roundsData) {
+        if (r.id < a || r.id > b) continue;
+        for (const [word, meaning] of r.words) {
+          if (seen.has(word)) continue;
+          seen.add(word);
+          loaded.push({ word, meaning });
+        }
+      }
+      if (loaded.length < 2) return;
+      wordsData = loaded;
+      document.querySelectorAll('#sheetBtnGrid .sheet-btn').forEach(b => b.classList.remove('active'));
+      const btn = document.getElementById('roundUseBtn');
+      btn.classList.add('active');
+      btn.textContent = '✔ 선택됨';
+      const label = a === b ? `${a}회` : `${a}~${b}회`;
+      document.getElementById('statusText').innerHTML =
+        `📘 오늘의 영단어 <b>${label}</b> · 총 <b>${wordsData.length}</b>개 단어 준비 완료!`;
+      document.getElementById('setupControls').style.display = 'block';
+      document.getElementById('startBtn').style.display = 'block';
+    }
+
+    window.onload = () => { initCamera(); toggleMirror(); loadRounds(); };
 
     function toggleSetupUI() {
       currentMode = document.getElementById('gameModeSelect').value;
