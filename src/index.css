@@ -1,4 +1,9 @@
 /* Global Styles (from original styles.css) */
+:root {
+    /* Fixed menu, its top offset, and breathing room for page content. */
+    --navbar-clearance: calc(100px + env(safe-area-inset-top, 0px));
+}
+
 body {
     background-color: #1c2331;
     /* Image's deep dark blue-gray */
@@ -14,7 +19,7 @@ header {
 
 .floating-navbar {
     position: fixed;
-    top: 20px;
+    top: calc(20px + env(safe-area-inset-top, 0px));
     left: 0;
     width: 100%;
     display: flex;
@@ -118,8 +123,7 @@ header {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding-top: 100px;
-    /* Reverted back to previous compact spacing */
+    padding-top: var(--navbar-clearance);
     padding-bottom: 3rem;
 }
 
@@ -273,9 +277,12 @@ img:active {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    /* Exact match with original WordChallenge01.html */
-    height: 100vh;
+    justify-content: flex-start;
+    justify-content: safe center;
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: var(--navbar-clearance) 0 2rem;
+    box-sizing: border-box;
     margin: 0;
 }
 
