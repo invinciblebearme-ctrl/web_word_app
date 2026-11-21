@@ -11,6 +11,8 @@ import Review from './pages/Review'
 const Topics = lazy(() => import('./pages/Topics'))
 const Phonics = lazy(() => import('./pages/Phonics'))
 const Sentences = lazy(() => import('./pages/Sentences'))
+const Classroom = lazy(() => import('./pages/Classroom'))
+const ClassShare = lazy(() => import('./pages/ClassShare'))
 import Navbar from './components/Navbar'
 import { ToastProvider } from './components/Toast'
 
@@ -32,6 +34,8 @@ function App() {
         <Route path="/phonics" element={<Suspense fallback={null}><Phonics /></Suspense>} />
         <Route path="/phonics/:key" element={<Suspense fallback={null}><Phonics /></Suspense>} />
         <Route path="/sentences" element={<Suspense fallback={null}><Sentences /></Suspense>} />
+        <Route path="/classroom" element={<Suspense fallback={null}><Classroom /></Suspense>} />
+        <Route path="/class" element={<Suspense fallback={null}><ClassShare /></Suspense>} />
       </Routes>
     </Router>
     </ToastProvider>

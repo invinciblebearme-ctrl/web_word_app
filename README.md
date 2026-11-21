@@ -13,6 +13,8 @@
 - **단어별 예문**: 800단어마다 초등 수준 예문과 우리말 뜻, 문장 듣기
 - **소리 패턴** (`/phonics`): sh·ch 같은 자음 짝, 첫소리 이어 읽기, 매직 e, 모음 짝꿍, r 모음, 단어 가족(-ight, -ake …)으로 묶어 보고 듣고 쓰기 퀴즈
 - **나만의 문장** (`/sentences`): 배운 단어 2~3개로 영어 문장을 쓰고 저장, 따라 쓰기 줄이 있는 학습지 PDF로 내보내기
+- **수업 모드** (`/classroom`): 전자칠판용 전체 화면 플래시카드(회차·주제·학급 오답, 키보드 조작, 자동 넘기기), 번호 뽑기, 타이머
+- **학급 진도** (`/class`, 선택 기능): 학생은 학급 코드와 번호만으로 참여하고, 선생님은 번호별 학습량과 반 전체가 많이 틀린 단어 Top 10을 봅니다
 - **발음 피드백**: 음성 인식 후보 5개 중 가장 가까운 것으로 채점, 비슷한 정도(%)와 틀린 글자 표시, 천천히 듣기
 - **학습 습관**: 연속 학습일, 하루 목표(10문제), 최근 5주 학습 달력, 배지 17종
 - **학습 기록**: 단어별 숙련도(처음 → 익히는 중 → 거의 앎 → 완전히 앎)를 기록하고 홈 화면에 회차별 진도 표시
@@ -42,6 +44,10 @@ src/
   utils/progress.js 학습 기록과 간격 반복 (localStorage key: word_progress_v1)
   utils/quiz.js     퀴즈 문제 생성
   utils/speech.js   발음 듣기(TTS)와 음성 인식 지원 여부
+  utils/classSync.js 학급 진도 보내기 (대기열·재전송), utils/classroom.js 수업 도구
+functions/          Cloudflare Pages Functions (학급 진도 API, /api/classes/...)
+migrations/         D1 데이터베이스 스키마
+tests/functions/    API 테스트 (node:sqlite로 D1을 흉내 냄)
 public/
   quizn/, WordGame/ 별도 정적 페이지 (빌드 시 그대로 복사됨)
 ```
@@ -57,6 +63,19 @@ public/
   - `main`에 머지하면 운영 사이트에 배포되고, 다른 브랜치와 PR은 미리보기 주소에 배포됩니다.
   - 주소가 `#/...` 형식(HashRouter)이라 `_redirects` 같은 별도 설정은 필요 없습니다.
 - 예전에는 빌드 결과물을 TodayVoca800 저장소에 직접 올려 배포했습니다. 도메인을 이 저장소의 Pages 프로젝트로 옮긴 뒤에는 TodayVoca800을 고치지 않습니다.
+
+### 학급 진도 서버 설정 (D1)
+
+학급 진도 기능만 서버가 필요합니다. 설정하지 않아도 나머지 기능은 그대로 쓸 수 있고, 학급 화면에는 "아직 설정되지 않았어요"가 나옵니다.
+
+1. Cloudflare 대시보드 → **Storage & Databases → D1** → 데이터베이스 만들기 (예: `voca-class`)
+2. 만든 데이터베이스의 **Console**에서 `migrations/0001_class.sql` 내용을 붙여 넣고 실행
+3. Pages 프로젝트 → **Settings → Bindings → D1 database** 추가: 변수 이름 `DB`, 데이터베이스 `voca-class` (운영·미리보기 모두)
+4. 다시 배포하면 `/api/classes`가 동작합니다
+
+로컬 확인: `npx wrangler pages dev dist --d1 DB=local-class` (스키마는 `wrangler d1 execute ... --local --file migrations/0001_class.sql`로 적용)
+
+**개인정보**: 학생 이름·이메일·IP는 받거나 저장하지 않습니다. 학생은 학급 코드 + 출석번호(1~99)와 기기마다 무작위로 만든 번호로만 구분합니다. 선생님 키는 해시로만 저장하며, 학급을 지우면 그 학급의 모든 기록이 함께 지워집니다. 학생이 학급에서 나가면 그 학생의 번호별 기록은 지워지고, 단어별 익명 집계만 남습니다.
 
 ## 학습 기록과 복습 규칙
 

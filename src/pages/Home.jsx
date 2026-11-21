@@ -114,6 +114,8 @@ function Home() {
           <button className="topic-entry" onClick={() => navigate('/topics')}>🗂 주제별 <small>동물 · 음식 …</small></button>
           <button className="topic-entry" onClick={() => navigate('/phonics')}>🔤 소리 패턴 <small>sh · ee · -ight …</small></button>
           <button className="topic-entry" onClick={() => navigate('/sentences')}>✏️ 나만의 문장</button>
+          <button className="topic-entry" onClick={() => navigate('/classroom')}>🏫 수업 모드 <small>카드 · 뽑기 · 타이머</small></button>
+          <button className="topic-entry" onClick={() => navigate('/class')}>📊 학급 진도 <small>참여 · 통계</small></button>
         </div>
       </div>
 
