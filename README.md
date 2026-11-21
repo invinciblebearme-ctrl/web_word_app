@@ -68,9 +68,9 @@ public/
 
 학급 진도 기능만 서버가 필요합니다. 설정하지 않아도 나머지 기능은 그대로 쓸 수 있고, 학급 화면에는 "아직 설정되지 않았어요"가 나옵니다.
 
-1. Cloudflare 대시보드 → **Storage & Databases → D1** → 데이터베이스 만들기 (예: `voca-class`)
+1. Cloudflare 대시보드 → **Storage & Databases → D1** → 데이터베이스 준비. 운영에서는 note.allforedu.kr과 함께 쓰는 단어 앱 공용 DB `word-app-db`를 씁니다(그쪽 테이블은 `voca_` 접두사라 겹치지 않음)
 2. 만든 데이터베이스의 **Console**에서 `migrations/0001_class.sql` 내용을 붙여 넣고 실행
-3. Pages 프로젝트(TodayVoca800과 연결된 프로젝트) → **Settings → Bindings → D1 database** 추가: 변수 이름 `DB`, 데이터베이스 `voca-class` (운영·미리보기 모두)
+3. Pages 프로젝트(TodayVoca800과 연결된 프로젝트) → **Settings → Bindings → D1 database** 추가: 변수 이름 `DB`, 데이터베이스 `word-app-db` (운영·미리보기 모두)
 4. 다시 배포하면 `/api/classes`가 동작합니다
 
 로컬 확인: `npx wrangler pages dev dist --d1 DB=local-class` (스키마는 `wrangler d1 execute ... --local --file migrations/0001_class.sql`로 적용)
