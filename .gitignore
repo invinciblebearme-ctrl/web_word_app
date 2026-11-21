@@ -28,3 +28,6 @@ yarn-error.log*
 
 # npm cache
 /.npm-cache
+
+# Cloudflare wrangler local state
+/.wrangler

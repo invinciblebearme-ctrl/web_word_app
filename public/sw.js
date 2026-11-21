@@ -97,6 +97,8 @@ self.addEventListener('fetch', (event) => {
     return
   }
   if (url.origin !== self.location.origin) return
+  // 학급 진도 API는 항상 서버에서 새로 받는다 (저장하면 옛 진도가 보이고, 교사용 통계가 기기에 남는다)
+  if (url.pathname.startsWith('/api/')) return
   // 별도 정적 페이지(WordGame, quizn)는 간섭하지 않음
   if (!url.href.startsWith(SCOPE.href) || /\/(WordGame|quizn)\//.test(url.pathname)) return
 

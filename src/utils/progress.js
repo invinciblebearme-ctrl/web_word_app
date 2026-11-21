@@ -5,6 +5,7 @@
 //   due       : 다음 복습 날짜(자정 기준 timestamp)
 
 import { logAnswer } from './activity'
+import { queueAnswer } from './classSync'
 
 const STORAGE_KEY = 'word_progress_v1'
 const DAY = 24 * 60 * 60 * 1000
@@ -64,6 +65,7 @@ export const recordAnswer = (en, isCorrect, now = Date.now()) => {
   data[en] = nextRecord(data[en], isCorrect, now)
   saveProgress(data)
   logAnswer(isCorrect, now)
+  queueAnswer(en, isCorrect) // 학급에 참여 중일 때만 보낸다
   return data[en]
 }
 
